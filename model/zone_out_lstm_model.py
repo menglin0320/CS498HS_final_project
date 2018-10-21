@@ -14,6 +14,7 @@ class zone_out_lstm_model():
         self.initial_lr = tf.constant(0.2, dtype=tf.float32)
         self.n_labels = 2
         self.define_variables()
+        self.build_model()
 
     def define_variables(self):
         self.ZLSTM = ZoneoutLSTMCell(self.dim_hidden, self.is_train)
