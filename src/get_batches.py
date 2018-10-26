@@ -20,14 +20,14 @@ def get_batches(data_, batch_size):
         cur_batch = {}
         cur_batch_start = len(data_) - i*batch_size
         cur_batch_size = max(batch_size, len(data_) - i*batch_size)
-        max_n_embed = len(data_['attributes'][cur_batch_start + cur_batch_size - 1])
+        max_n_embed = len(data_[i]['attributes'][cur_batch_start + cur_batch_size - 1])
         cur_batch['data'] = []
         cur_batch['label'] = []
         cur_batch['mask'] = []
         for data_ind in range(cur_batch_start, cur_batch_start + cur_batch_size):
-            cur_batch['mask'].append(len(data_['attributes'][data_ind])-1)
-            cur_batch['data'].append(padding_samples(data_['attributes'][data_ind], max_n_embed))
-            cur_batch['label'].append(data_['label'][data_ind])
+            cur_batch['mask'].append(len(data_[i]['attributes'][data_ind])-1)
+            cur_batch['data'].append(padding_samples(data_[i]['attributes'][data_ind], max_n_embed))
+            cur_batch['label'].append(data_[i]['label'][data_ind])
         cur_batch['mask'] = cvt2onehot(np.asarray(cur_batch['mask']))
         cur_batch['label'] = np.asarray(cur_batch['label'])
         cur_batch['data'] = np.asarray(cur_batch['data'])
