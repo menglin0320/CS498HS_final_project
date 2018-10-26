@@ -59,10 +59,13 @@ def get_freqency_dict(word_dict, frequency_path = ""):
     return freqency_dict
 
 def split_data():
+    print("In split_data()")
     current_dir = os.path.dirname(os.path.abspath(__file__))
     print("Current Dir:"+current_dir)
-    sample_path = current_dir + 'data/processed_data/processed_attributes.txt'
-    label_path = current_dir + 'data/processed_data/labels.txt'
+    sample_path = current_dir + '/data/processed_data/processed_attributes.txt'
+    label_path = current_dir + '/data/processed_data/labels.txt'
+    print(sample_path)
+    print(label_path)
     
     with open(sample_path, 'r') as f1:
         lines=f1.readlines()
@@ -73,6 +76,8 @@ def split_data():
     #temp2=shuffle(lines2)
     n_samples=len(data_list)
     data_array=np.array(data_list)
+    
+    print("Attribute Read Done")
     
     with open(label_path, 'r') as f2:
         lines3=f2.readlines()
@@ -85,6 +90,7 @@ def split_data():
     label_array_no_id = label_array[:,1:2]
     combine=np.hstack((data_array,label_array_no_id))
     np.random.shuffle(combine)
+    print("Label Added")
     #print(combine2[0][0])
     
     n_training=int(0.8*n_samples)
@@ -104,22 +110,27 @@ def split_data():
     #print(trainn[0][6],trainn[1][6])
     trainn = trainn[trainn[:,6].argsort()]
     testn = testn[testn[:,6].argsort()]
+
+    print("Data split Done")
     
-    word_embedding_path = current_dir + 'resource/word_embeddings.json'
+    word_embedding_path = current_dir + '/resource/word_embeddings.json'
     word_dict = get_word2vec_dict(word_embedding_path)
-    frequency_path = current_dir + 'resource/word_frequence'
+    frequency_path = current_dir + '/resource/relevant_corpus.txt'
     freqency_dict = get_freqency_dict(frequency_path)
     
     trainn = words2vecs(trainn, word_dict, freqency_dict)
     testn = words2vecs(testn, word_dict, freqency_dict)
     
-    train_out_path = current_dir + 'processed_data/train_data.txt'
+    print("Word 2 Vec Done")
+    
+    train_out_path = current_dir + '/processed_data/train_data.txt'
     trainfile = open(train_out_path, 'w', encoding='utf-8')
     json.dump(trainn, trainfile, indent = 4, ensure_ascii=False)
-    test_out_path = current_dir + 'processed_data/test_data.txt'
+    test_out_path = current_dir + '/processed_data/test_data.txt'
     testfile = open(test_out_path, 'w', encoding='utf-8')
     json.dump(testn, testfile, indent = 4, ensure_ascii=False)
     
-if __name__ == 'main':
+if __name__ == '__main__':
+    print("Hello!")
     split_data()
     
