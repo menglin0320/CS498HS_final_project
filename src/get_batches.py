@@ -16,10 +16,10 @@ def cvt2onehot(values):
 def get_batches(data_, batch_size):
     ret = []
     i = 0
-    while(batch_size*i < data_.shape[0]):
+    while(batch_size*i < len(data_)):
         cur_batch = {}
-        cur_batch_start = data_.shape[0] - i*batch_size
-        cur_batch_size = max(batch_size, data_.shape[0] - i*batch_size)
+        cur_batch_start = len(data_) - i*batch_size
+        cur_batch_size = max(batch_size, len(data_) - i*batch_size)
         max_n_embed = len(data_['attributes'][cur_batch_start + cur_batch_size - 1])
         cur_batch['data'] = []
         cur_batch['label'] = []
