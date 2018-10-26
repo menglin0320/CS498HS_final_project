@@ -5,3 +5,4 @@ class config:
     word_frequence_json = 'resource/word_frequence.json'
     data_path = 'data/all_data.json'
     batch_size = 32
+    checkpoint_dir = 'save'

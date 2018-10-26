@@ -10,7 +10,7 @@ class zone_out_lstm_model():
         self.labels = tf.place_holder([-1, 1], dtype=tf.float32)
         self.mask = tf.place_holder([-1, -1, 1])
         self.is_train = tf.place_holder([], dtype=tf.int64)
-        self.seq_len = tf.place_holder([], dtype=tf.int64)
+        self.seq_len = tf.shape(self.embedding_batch)[1]
         self.initial_lr = tf.constant(0.2, dtype=tf.float32)
         self.n_labels = 2
         self.define_variables()
@@ -25,8 +25,8 @@ class zone_out_lstm_model():
         self.bias_2logit = tf.get_variable("bias_2logit", shape=[self.n_labels],
                                            initializer=self.bias_initializer)
 
-    def convert_label2one_hot(self, i):
-        labels = self.labels[:, i]
+    def convert_label2one_hot(self):
+        labels = self.labels[:,:]
         labels = tf.expand_dims(labels, 1)
         batch_range = tf.expand_dims(tf.range(0, self.batch_size, 1), 1)
         sparse = tf.concat([batch_range, labels], 1)
@@ -36,7 +36,7 @@ class zone_out_lstm_model():
     def one_iteration(self, state, i):
         out, state = self.ZLSTM(self.embedding_batch[:, i, :], state)
         logits = tf.matmul(out, self.w_2logit) + self.bias_2logit
-        one_hot = self.convert_label2one_hot(i)
+        one_hot = self.convert_label2one_hot()
         loss = tf.nn.sigmoid_cross_entropy_with_logits(one_hot, logits)
         loss = loss * self.mask[:, i, :]
         predict = tf.cast(tf.argmax(logits, axis=1), tf.int32)
@@ -54,6 +54,7 @@ class zone_out_lstm_model():
         tf.get_variable_scope().reuse_variables()
 
         i = tf.constant(1)
+
         while_condition = lambda i, N1, N2, N3: tf.less(i, self.seq_len)
 
         def body(i, state):
@@ -64,6 +65,7 @@ class zone_out_lstm_model():
 
         # do the loop
         [i, state] = tf.while_loop(while_condition, body, [i, state])
+
         self.loss = tf.mean(self.loss)
         self.accuracy = tf.mean(self.total_corrects)
         self.lr = tf.train.exponential_decay(self.initial_lr, self.counter_dis, 30000, 0.96, staircase=True)
