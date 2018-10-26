@@ -33,6 +33,7 @@ def load_data(train_path, test_path):
         test_data_raw = pickle.load(f)
     full_data = {}
     full_data['train'] = []
+    full_data['test'] = []
     for i, cell in enumerate(train_data_raw):
         full_data['train'].append({})
         full_data['train'][i]['attributes'] = cell[1]
