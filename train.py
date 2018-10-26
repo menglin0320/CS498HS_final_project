@@ -31,12 +31,12 @@ def load_data(train_path, test_path):
         test_data_raw = pickle.load(f)
     full_data = {}
     full_data['train'] = {}
-    full_data['train']['attributes'] = train_data_raw[1]
-    full_data['train']['label'] = train_data_raw[5]
+    full_data['train']['attributes'] = [cell[1] for cell in train_data_raw]
+    full_data['train']['label'] = [cell[5] for cell in train_data_raw]
 
     full_data['test'] = {}
-    full_data['test']['attributes'] = test_data_raw[1]
-    full_data['test']['label'] = test_data_raw[5]
+    full_data['test']['attributes'] = [cell[1] for cell in test_data_raw]
+    full_data['test']['label'] = [cell[5] for cell in test_data_raw]
     return full_data
 
 if __name__ == '__main__':
