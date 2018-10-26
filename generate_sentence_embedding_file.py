@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from random import shuffle
 import os
+import pickle
 
 
 def basic_sentence_split(words):
@@ -15,7 +16,7 @@ def basic_sentence_split(words):
 
 def sentence2vector(sentences, word_dict, freqency_dict):
     vectors = []
-    a = 0.00001
+    a = 100000
     for s in sentences:
         tmp = np.zeros(300)
         for word in s:
@@ -61,6 +62,11 @@ def get_freqency_dict(word_dict, frequency_path=""):
         line = line.split(' ')
         if (line[0] in word_dict):
             frequency_dict[line[0]] = float(line[1])
+
+    for word in word_dict:
+        if word not in frequency_dict:
+            print(word)
+            frequency_dict[word]=1
     return frequency_dict
 
 
@@ -135,13 +141,18 @@ def split_data():
 
     print("Word 2 Vec Done")
 
-    train_out_path = current_dir + '/processed_data/train_data.txt'
-    trainfile = open(train_out_path, 'w', encoding='utf-8')
-    json.dump(trainn, trainfile, indent=4, ensure_ascii=False)
-    test_out_path = current_dir + '/processed_data/test_data.txt'
-    testfile = open(test_out_path, 'w', encoding='utf-8')
-    json.dump(testn, testfile, indent=4, ensure_ascii=False)
-
+    train_out_path = 'pkl_train_data'
+    trainfile = open(train_out_path, 'wb')
+    pickle.dump(trainn, trainfile)
+    test_out_path = 'pkl_test_data'
+    trainfile.close()
+    testfile = open(test_out_path, 'wb')
+    pickle.dump(testn, testfile)
+    testfile.close()
+    
+    #testfile = open(test_out_path, 'rb')
+    #tmp = pickle.load(testfile)
+    #print(tmp[0])
 
 if __name__ == '__main__':
     # print("Hello!")
