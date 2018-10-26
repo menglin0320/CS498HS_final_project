@@ -26,18 +26,18 @@ class zone_out_lstm_model():
         self.bias_2logit = tf.get_variable("bias_2logit", shape=[self.n_labels],
                                            initializer=self.bias_initializer)
 
-    def convert_label2one_hot(self):
-        labels = self.labels[:,:]
-        labels = tf.expand_dims(labels, 1)
-        batch_range = tf.expand_dims(tf.range(0, self.batch_size, 1), 1)
-        sparse = tf.concat([batch_range, labels], 1)
-        onehot = tf.sparse_to_dense(sparse, tf.stack([self.batch_size, self.n_labels]), 1.0, 0.0)
-        return onehot
+    # def convert_label2one_hot(self):
+    #     labels = self.labels[:,:]
+    #     labels = tf.expand_dims(labels, 1)
+    #     batch_range = tf.expand_dims(tf.range(0, self.batch_size, 1), 1)
+    #     sparse = tf.concat([batch_range, labels], 1)
+    #     onehot = tf.sparse_to_dense(sparse, tf.stack([self.batch_size, self.n_labels]), 1.0, 0.0)
+    #     return onehot
 
     def one_iteration(self, state, i):
         out, state = self.ZLSTM(self.embedding_batch[:, i, :], state)
         logits = tf.matmul(out, self.w_2logit) + self.bias_2logit
-        one_hot = self.convert_label2one_hot()
+        one_hot = tf.one_hot(self.labels[:, i], 2)
         loss = tf.nn.sigmoid_cross_entropy_with_logits(one_hot, logits)
         loss = loss * self.mask[:, i, :]
         predict = tf.cast(tf.argmax(logits, axis=1), tf.int32)
