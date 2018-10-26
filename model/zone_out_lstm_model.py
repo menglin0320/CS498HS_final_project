@@ -2,7 +2,6 @@ import tensorflow as tf
 from src.util.DNN_util.zone_out_lstm import ZoneoutLSTMCell
 import tensorflow.contrib.layers as layers
 
-
 class zone_out_lstm_model():
     def __init__(self, word_embedding_size):
         self.dim_hidden = 300
@@ -48,8 +47,7 @@ class zone_out_lstm_model():
         return state, loss, correct_preditions
 
     def build_model(self):
-        zero_state = self.lstm.zero_state(self.batch_size, dtype=tf.float32)
-
+        zero_state = self.ZLSTM.zero_state(self.batch_size, dtype=tf.float32)
         state, loss, correct_preditions = self.one_iteration(zero_state, 0)
         self.loss = loss
         self.total_corrects = correct_preditions
