@@ -16,11 +16,12 @@ def basic_sentence_split(words):
 
 def sentence2vector(sentences, word_dict, freqency_dict):
     vectors = []
-    a = 100000
+    total_words_appear = 1500000000
+    a = 10e-3
     for s in sentences:
         tmp = np.zeros(300)
         for word in s:
-            tmp += a / (a + freqency_dict[word]) * np.asarray(word_dict[word])
+            tmp += a / (a + freqency_dict[word]/total_words_appear) * np.asarray(word_dict[word])
         tmp /= len(s)
         vectors.append(tmp.tolist())
     return vectors
@@ -70,12 +71,12 @@ def get_freqency_dict(word_dict, frequency_path=""):
     return frequency_dict
 
 
-def split_data():
+def split_data(config):
     print("In split_data()")
     current_dir = os.path.dirname(os.path.abspath(__file__))
     print("Current Dir:" + current_dir)
-    sample_path = current_dir + '/data/processed_data/processed_attributes.txt'
-    label_path = current_dir + '/data/processed_data/labels.txt'
+    sample_path = config.processed_data_path
+    label_path = config.label_path
     print(sample_path)
     print(label_path)
 
@@ -141,10 +142,10 @@ def split_data():
 
     print("Word 2 Vec Done")
 
-    train_out_path = 'pkl_train_data'
+    train_out_path = config.train_data_path
     trainfile = open(train_out_path, 'wb')
     pickle.dump(trainn, trainfile)
-    test_out_path = 'pkl_test_data'
+    test_out_path = config.test_data_path
     trainfile.close()
     testfile = open(test_out_path, 'wb')
     pickle.dump(testn, testfile)
