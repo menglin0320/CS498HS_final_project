@@ -2,6 +2,7 @@ import numpy as np
 
 def padding_samples(passage_embedding, max_n_embed):
     padding_needed = max_n_embed - len(passage_embedding)
+    print('max_n_embed{}, passage_embedding{}'.format(max_n_embed, len(passage_embedding)))
     if padding_needed < 0:
         raise(ValueError('max embedding length evaluate fault'))
     for i in range(0, padding_needed):
