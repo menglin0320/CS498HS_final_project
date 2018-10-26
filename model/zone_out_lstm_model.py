@@ -7,7 +7,7 @@ class zone_out_lstm_model():
     def __init__(self, word_embedding_size):
         self.dim_hidden = 300
         self.embedding_batch = tf.placeholder(tf.float32, [-1, -1, word_embedding_size])
-        self.labels = tf.placeholder(tf.float32, [-1, 1])
+        self.labels = tf.placeholder(tf.int64, [-1, 1])
         self.mask = tf.placeholder(tf.float32, [-1, -1, 1])
         self.is_train = tf.placeholder(tf.float32, [])
         self.seq_len = tf.shape(self.embedding_batch)[1]
