@@ -37,6 +37,7 @@ def load_data(train_path, test_path):
     for i, cell in enumerate(train_data_raw):
         full_data['train'].append({})
         full_data['train'][i]['attributes'] = cell[1]
+        print(len(cell[1]))
         full_data['train'][i]['label'] = cell[5]
 
     for i, cell in enumerate(test_data_raw):

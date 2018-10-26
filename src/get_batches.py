@@ -3,9 +3,10 @@ import numpy as np
 
 def padding_samples(passage_embedding, max_n_embed):
     padding_needed = max_n_embed - len(passage_embedding)
-    print('max_n_embed{}, passage_embedding{}'.format(max_n_embed, len(passage_embedding)))
+    # print('max_n_embed{}, passage_embedding{}'.format(max_n_embed, len(passage_embedding)))
     if padding_needed < 0:
         raise (ValueError('max embedding length evaluate fault'))
+        # print('max embedding length evaluate fault')
     for i in range(0, padding_needed):
         passage_embedding.append([0] * 300)
     return passage_embedding
@@ -18,6 +19,7 @@ def cvt2onehot(values):
 
 
 def get_batches(data_, batch_size):
+    print(batch_size)
     ret = []
     i = 0
     while (batch_size * i < len(data_)):
@@ -32,7 +34,7 @@ def get_batches(data_, batch_size):
             cur_batch['mask'].append(len(data_[data_ind]['attributes']) - 1)
             cur_batch['data'].append(padding_samples(data_[data_ind]['attributes'], max_n_embed))
             cur_batch['label'].append(data_[data_ind]['label'])
-            print(data_ind)
+            # print(data_ind)
         cur_batch['mask'] = cvt2onehot(np.asarray(cur_batch['mask']))
         cur_batch['label'] = np.asarray(cur_batch['label'])
         cur_batch['data'] = np.asarray(cur_batch['data'])
