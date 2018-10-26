@@ -7,6 +7,7 @@ import tensorflow as tf
 import numpy as np
 import pickle
 
+
 def initialize_model(checkpoint_dir):
     sess = tf.Session(config=tf.ConfigProto(log_device_placement=True))
     model = zone_out_lstm_model()
@@ -24,20 +25,26 @@ def initialize_model(checkpoint_dir):
         sess.run(tf.global_variables_initializer())
     return model, saver, sess, start_step
 
+
 def load_data(train_path, test_path):
     with open(train_path, 'rb') as f:
         train_data_raw = pickle.load(f)
     with open(test_path, 'rb') as f:
         test_data_raw = pickle.load(f)
     full_data = {}
-    full_data['train'] = {}
-    full_data['train']['attributes'] = [cell[1] for cell in train_data_raw]
-    full_data['train']['label'] = [cell[5] for cell in train_data_raw]
+    full_data['train'] = []
+    for i, cell in enumerate(train_data_raw):
+        full_data['train'][i] = {}
+        full_data['train'][i]['attributes'] = cell[1]
+        full_data['train'][i]['label'] = cell[5]
 
-    full_data['test'] = {}
-    full_data['test']['attributes'] = [cell[1] for cell in test_data_raw]
-    full_data['test']['label'] = [cell[5] for cell in test_data_raw]
+    for i, cell in enumerate(test_data_raw):
+        full_data['test'][i] = {}
+        full_data['test'][i]['attributes'] = cell[1]
+        full_data['test'][i]['label'] = cell[5]
+
     return full_data
+
 
 if __name__ == '__main__':
     data_path = config.data_path
@@ -75,12 +82,13 @@ if __name__ == '__main__':
         for j in range(0, data_test_batches.shape[0]):
             cur_batch = data_test_batches[j]
             test_loss, test_accy = sess.run([model.loss, model.accuracy],
-                                                 feed_dict={model.embedding_batch: cur_batch['data'],
-                                                            model.labels: cur_batch['label'],
-                                                            model.mask: cur_batch['mask'],
-                                                            model.is_train: False})
+                                            feed_dict={model.embedding_batch: cur_batch['data'],
+                                                       model.labels: cur_batch['label'],
+                                                       model.mask: cur_batch['mask'],
+                                                       model.is_train: False})
             test_avg_loss += test_loss
             test_avg_accy += test_accy
 
-        print('for batch {}: on training_sample avg loss is {}, avg_accy is {}'.format(i, train_avg_loss, train_avg_accy))
+        print(
+            'for batch {}: on training_sample avg loss is {}, avg_accy is {}'.format(i, train_avg_loss, train_avg_accy))
         print('for batch {}: on test_sample avg loss is {}, avg_accy is {}'.format(i, test_avg_loss, test_avg_accy))
