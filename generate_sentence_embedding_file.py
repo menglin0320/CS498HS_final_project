@@ -1,11 +1,8 @@
-from project_configuration import config
 import json
 import numpy as np
-import matplotlib.pyplot as plt
-from random import shuffle
 import os
 import pickle
-
+from project_configuration import config
 
 def basic_sentence_split(words):
     sentences = []
@@ -165,4 +162,4 @@ if __name__ == '__main__':
     # freqency_dict = get_freqency_dict(word_dict, frequency_path)
     #
     # trainn = words2vecs(trainn, word_dict, freqency_dict)
-    split_data()
+    split_data(config)
