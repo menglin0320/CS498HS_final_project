@@ -10,7 +10,7 @@ import pickle
 
 def initialize_model(checkpoint_dir):
     sess = tf.Session(config=tf.ConfigProto(log_device_placement=True))
-    model = zone_out_lstm_model()
+    model = zone_out_lstm_model(300)
     saver = tf.train.Saver(max_to_keep=10)
     saved_path = tf.train.latest_checkpoint(checkpoint_dir)
     start_step = 0
