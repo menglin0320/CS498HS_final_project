@@ -124,11 +124,11 @@ def split_data(config):
     del text_len_test
     del combine
     # print(trainn[0][6],trainn[1][6])
-    print(trainn[:, 6].astype(np.float32))
-    trainn = trainn[trainn[:, 6].astype(np.int64).argsort()]
+    # print(trainn[:, 6].astype(np.float32))
+    trainn = trainn[trainn[:, 6].astype(np.float32).argsort()]
     # for sample in trainn:
     #     print(sample[6])
-    testn = testn[testn[:, 6].argsort()]
+    testn = testn[testn[:, 6].astype(np.float32).argsort()]
 
     print("Data split Done")
     print(trainn[0])
