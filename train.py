@@ -91,6 +91,5 @@ if __name__ == '__main__':
             test_avg_loss += test_loss
             test_avg_accy += test_accy
 
-        print(
-            'for batch {}: on training_sample avg loss is {}, avg_accy is {}'.format(i, train_avg_loss, train_avg_accy))
+        print('for batch {}: on training_sample avg loss is {}, avg_accy is {}'.format(i, train_avg_loss, train_avg_accy))
         print('for batch {}: on test_sample avg loss is {}, avg_accy is {}'.format(i, test_avg_loss, test_avg_accy))

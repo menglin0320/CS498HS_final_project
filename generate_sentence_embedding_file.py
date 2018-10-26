@@ -126,12 +126,12 @@ def split_data(config):
     # print(trainn[0][6],trainn[1][6])
     # print(trainn[:, 6].astype(np.float32))
     trainn = trainn[trainn[:, 6].astype(np.float32).argsort()]
-    for sample in trainn:
-        print(sample[6])
+    # for sample in trainn:
+    #     print(sample[6])
     testn = testn[testn[:, 6].astype(np.float32).argsort()]
 
     print("Data split Done")
-    print(trainn[0])
+    # print(trainn[0])
     word_embedding_path = current_dir + '/resource/word_embeddings.json'
     word_dict = get_word2vec_dict(word_embedding_path)
     frequency_path = current_dir + '/resource/relevant_corpus2.txt'
