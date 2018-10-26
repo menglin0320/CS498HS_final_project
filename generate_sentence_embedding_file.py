@@ -41,22 +41,22 @@ def get_word2vec_dict(word_embedding_path):
     word_embedding_file = open(word_embedding_path, 'r')
     word_dict = json.load(word_embedding_file)
     for w in word_dict:
-        word_dict[w] = [float(num_str) for num_str in word_dict[w].split('')]
+        word_dict[w] = [float(num_str) for num_str in word_dict[w].split(' ')]
     return word_dict
 
 def get_freqency_dict(word_dict, frequency_path = ""):
-    if freqency_path=="":
+    if frequency_path=="":
         return get_dummy_dict(word_dict)
 
-    freqency_file = open(freqency_path, 'r')
-    freqency_dict = {}
-    line = freqency_file.readline()
+    frequency_file = open(frequency_path, 'r')
+    frequency_dict = {}
+    line = frequency_file.readline()
     while line!='':
         line = line.split(' ')
         if(line[0] in word_dict):
             freqency_dict[line[0]] = float(line[1])
-        line = freqency_file.readline()
-    return freqency_dict
+        line = frequency_file.readline()
+    return frequency_dict
 
 def split_data():
     print("In split_data()")
@@ -91,6 +91,9 @@ def split_data():
     combine=np.hstack((data_array,label_array_no_id))
     np.random.shuffle(combine)
     print("Label Added")
+    del label_array
+    del label_array_no_id
+    del data_array
     #print(combine2[0][0])
     
     n_training=int(0.8*n_samples)
@@ -107,12 +110,15 @@ def split_data():
     #print(text_len_train[0][0])
     trainn=np.hstack((trainn,text_len_train))
     testn=np.hstack((testn,text_len_test))
+    del text_len_train
+    del text_len_test
+    del combine
     #print(trainn[0][6],trainn[1][6])
     trainn = trainn[trainn[:,6].argsort()]
     testn = testn[testn[:,6].argsort()]
 
     print("Data split Done")
-    
+    print(trainn[0])
     word_embedding_path = current_dir + '/resource/word_embeddings.json'
     word_dict = get_word2vec_dict(word_embedding_path)
     frequency_path = current_dir + '/resource/relevant_corpus.txt'
@@ -132,5 +138,14 @@ def split_data():
     
 if __name__ == '__main__':
     print("Hello!")
-    split_data()
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    trainn = np.array([['17995' 'thought' '1952' 'A' '0.24' '0' '1.0']])
+    word_embedding_path = current_dir + '/resource/word_embeddings.json'
+    word_dict = get_word2vec_dict(word_embedding_path)
+    frequency_path = current_dir + '/resource/relevant_corpus.txt'
+    freqency_dict = get_freqency_dict(frequency_path)
+    
+    trainn = words2vecs(trainn, word_dict, freqency_dict)
+    #split_data()
+    
     
