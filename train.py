@@ -25,9 +25,9 @@ def initialize_model(checkpoint_dir):
     return model, saver, sess, start_step
 
 def load_data(train_path, test_path):
-    with open(train_path, 'r') as f:
+    with open(train_path, 'rb') as f:
         train_data_raw = pickle.load(f)
-    with open(test_path, 'r') as f:
+    with open(test_path, 'rb') as f:
         test_data_raw = pickle.load(f)
     full_data = {}
     full_data['train'] = {}
