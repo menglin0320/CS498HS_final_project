@@ -5,7 +5,7 @@ from model.zone_out_lstm_model import *
 import os
 import tensorflow as tf
 import numpy as np
-
+import pickle
 
 def initialize_model(checkpoint_dir):
     sess = tf.Session(config=tf.ConfigProto(log_device_placement=True))
@@ -24,15 +24,30 @@ def initialize_model(checkpoint_dir):
         sess.run(tf.global_variables_initializer())
     return model, saver, sess, start_step
 
+def load_data(train_path, test_path):
+    with open(train_path, 'r') as f:
+        train_data_raw = pickle.load(f)
+    with open(test_path, 'r') as f:
+        test_data_raw = pickle.load(f)
+    full_data = {}
+    full_data['train'] = {}
+    full_data['train']['attributes'] = train_data_raw[1]
+    full_data['train']['label'] = train_data_raw[5]
+
+    full_data['test'] = {}
+    full_data['test']['attributes'] = test_data_raw[1]
+    full_data['test']['label'] = test_data_raw[5]
+    return full_data
 
 if __name__ == '__main__':
     data_path = config.data_path
     batch_size = config.batch_size
     checkpoint_dir = config.checkpoint_dir
-
+    train_path = config.train_data_path
+    test_path = config.test_data_path
     n_epoch = 100000
     # TODO write the valid read data function
-    data_dict = load_data(data_path)
+    data_dict = load_data(train_path, test_path)
     data_train_batches = get_batches(data_dict['train'], batch_size)
     data_test_batches = get_batches(data_dict['test'], batch_size)
 
