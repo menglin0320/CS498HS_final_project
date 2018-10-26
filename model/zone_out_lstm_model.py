@@ -13,6 +13,8 @@ class zone_out_lstm_model():
         self.seq_len = tf.shape(self.embedding_batch)[1]
         self.initial_lr = tf.constant(0.2, dtype=tf.float32)
         self.n_labels = 2
+        self.weight_initializer = tf.contrib.layers.xavier_initializer()
+        self.bias_initializer = tf.constant_initializer(0.0)
         self.define_variables()
         self.build_model()
 
