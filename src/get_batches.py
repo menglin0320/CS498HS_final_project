@@ -18,7 +18,7 @@ def get_batches(data_, batch_size):
     i = 0
     while(batch_size*i < len(data_)):
         cur_batch = {}
-        cur_batch_start = len(data_) - i*batch_size
+        cur_batch_start = i*batch_size
         cur_batch_size = max(batch_size, len(data_) - i*batch_size)
         max_n_embed = len(data_[cur_batch_start + cur_batch_size - 1]['attributes'])
         cur_batch['data'] = []
