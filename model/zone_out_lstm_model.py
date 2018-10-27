@@ -55,7 +55,7 @@ class zone_out_lstm_model():
 
         i = tf.constant(1)
 
-        while_condition = lambda i, N1, N2, N3: tf.less(i, self.seq_len)
+        while_condition = lambda i, N1: tf.less(i, self.seq_len)
 
         def body(i, state):
             state, loss, correct_preditions = self.one_iteration(state, i)
