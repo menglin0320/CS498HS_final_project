@@ -59,7 +59,7 @@ class zone_out_lstm_model():
 
         def body(i, state, total_corrects, loss):
             state, loss, correct_preditions = self.one_iteration(state, i)
-            self.total_corrects += correct_preditions
+            total_corrects += correct_preditions
             self.loss += loss
             return [i + 1, state, total_corrects, loss]
 
