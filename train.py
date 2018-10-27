@@ -64,7 +64,7 @@ if __name__ == '__main__':
     model, saver, sess, start_step = initialize_model(checkpoint_dir)
     n_batches = len(data_train_batches)
     for i in range(start_step // n_batches, n_epoch):
-        rand_permute = np.arange(batch_size)
+        rand_permute = np.arange(n_batches)
         np.random.shuffle(rand_permute)
         saver.save(sess, checkpoint_path, global_step=i * rand_permute.shape[0])
         train_avg_loss = 0
@@ -81,6 +81,8 @@ if __name__ == '__main__':
                                                             model.is_train: True})
             train_avg_loss += train_loss
             train_avg_accy += train_accy
+        train_avg_loss /= rand_permute.shape[0]
+        train_avg_accy /= rand_permute.shape[0]
 
         for j in range(0, len(data_test_batches)):
             cur_batch = data_test_batches[j]
@@ -91,6 +93,8 @@ if __name__ == '__main__':
                                                        model.is_train: False})
             test_avg_loss += test_loss
             test_avg_accy += test_accy
+        test_avg_loss /= len(data_test_batches)
+        test_avg_accy /= len(data_test_batches)
 
         print('for batch {}: on training_sample avg loss is {}, avg_accy is {}'.format(i, train_avg_loss, train_avg_accy))
         print('for batch {}: on test_sample avg loss is {}, avg_accy is {}'.format(i, test_avg_loss, test_avg_accy))
