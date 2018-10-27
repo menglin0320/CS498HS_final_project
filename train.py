@@ -65,7 +65,7 @@ if __name__ == '__main__':
     for i in range(start_step // n_batches, n_epoch):
         rand_permute = np.arange(batch_size)
         np.random.shuffle(rand_permute)
-        saver.save(sess, checkpoint_dir, global_step=i * rand_permute.shape[0])
+        saver.save(sess, checkpoint_path, global_step=i * rand_permute.shape[0])
         train_avg_loss = 0
         train_avg_accy = 0
         test_avg_loss = 0

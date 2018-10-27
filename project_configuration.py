@@ -6,5 +6,6 @@ class config:
     data_path = 'data/all_data.json'
     batch_size = 32
     checkpoint_dir = 'save'
+    checkpoint_path = 'save/model.ckpt'
     train_data_path = '/home/4T/usr/menglin/CS498HS/pkl_train_data'
     test_data_path = '/home/4T/usr/menglin/CS498HS/pkl_test_data'
