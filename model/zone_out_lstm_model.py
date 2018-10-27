@@ -49,23 +49,24 @@ class zone_out_lstm_model():
     def build_model(self):
         zero_state = self.ZLSTM.zero_state(self.batch_size, dtype=tf.float32)
         state, loss, correct_preditions = self.one_iteration(zero_state, 0)
-        self.loss = loss
-        self.total_corrects = correct_preditions
+        loss = loss
+        total_corrects = correct_preditions
         tf.get_variable_scope().reuse_variables()
 
         i = tf.constant(1)
 
-        while_condition = lambda i, N1: tf.less(i, self.seq_len)
+        while_condition = lambda i, N1, N2, N3: tf.less(i, self.seq_len)
 
-        def body(i, state):
+        def body(i, state, total_corrects, loss):
             state, loss, correct_preditions = self.one_iteration(state, i)
             self.total_corrects += correct_preditions
             self.loss += loss
-            return [i + 1, state]
+            return [i + 1, state, total_corrects, loss]
 
         # do the loop
-        [i, state] = tf.while_loop(while_condition, body, [i, state])
-
+        [i, state, total_corrects, loss] = tf.while_loop(while_condition, body, [i, state, total_corrects, loss])
+        self.total_corrects = total_corrects
+        self.loss = loss
         self.loss = tf.reduce_mean(self.loss)
         self.accuracy = tf.reduce_mean(self.total_corrects)
         self.lr = tf.train.exponential_decay(self.initial_lr, self.counter_dis, 30000, 0.96, staircase=True)
