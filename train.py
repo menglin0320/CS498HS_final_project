@@ -82,7 +82,7 @@ if __name__ == '__main__':
             train_avg_loss += train_loss
             train_avg_accy += train_accy
 
-        for j in range(0, data_test_batches.shape[0]):
+        for j in range(0, len(data_test_batches)):
             cur_batch = data_test_batches[j]
             test_loss, test_accy = sess.run([model.loss, model.accuracy],
                                             feed_dict={model.embedding_batch: cur_batch['data'],
