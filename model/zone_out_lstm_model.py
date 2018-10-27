@@ -48,24 +48,26 @@ class zone_out_lstm_model():
         return state, loss, correct_preditions
 
     def build_model(self):
-        zero_state = self.ZLSTM.zero_state(self.batch_size, dtype=tf.float32)
-        state, loss, correct_preditions = self.one_iteration(zero_state, 0)
-        total_loss = loss
-        total_corrects = correct_preditions
-        tf.get_variable_scope().reuse_variables()
+        with tf.variable_scope('classifier'):
+            zero_state = self.ZLSTM.zero_state(self.batch_size, dtype=tf.float32)
+            state, loss, correct_preditions = self.one_iteration(zero_state, 0)
+            total_loss = loss
+            total_corrects = correct_preditions
+            tf.get_variable_scope().reuse_variables()
 
-        i = tf.constant(1)
+            i = tf.constant(1)
 
-        while_condition = lambda i, N1, N2, N3: tf.less(i, self.seq_len)
+            while_condition = lambda i, N1, N2, N3: tf.less(i, self.seq_len)
 
-        def body(i, state, total_corrects, total_loss):
-            state, loss, correct_preditions = self.one_iteration(state, i)
-            total_corrects += correct_preditions
-            total_loss += loss
-            return [i + 1, state, total_corrects, total_loss]
+            def body(i, state, total_corrects, total_loss):
+                state, loss, correct_preditions = self.one_iteration(state, i)
+                total_corrects += correct_preditions
+                total_loss += loss
+                return [i + 1, state, total_corrects, total_loss]
 
-        # do the loop
-        [i, state, total_corrects, total_loss] = tf.while_loop(while_condition, body, [i, state, total_corrects, loss])
+            # do the loop
+            [i, state, total_corrects, total_loss] = tf.while_loop(while_condition, body, [i, state, total_corrects, loss])
+
         self.total_corrects = total_corrects
         self.loss = total_loss
         self.loss = tf.reduce_mean(self.loss)
