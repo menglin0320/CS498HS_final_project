@@ -61,7 +61,7 @@ if __name__ == '__main__':
     data_test_batches = get_batches(data_dict['test'], batch_size)
 
     model, saver, sess, start_step = initialize_model(checkpoint_dir)
-    n_batches = data_train_batches[0]
+    n_batches = data_train_batches.shape[0]
     for i in range(start_step // n_batches, n_epoch):
         rand_permute = np.arange(batch_size)
         np.random.shuffle(rand_permute)
