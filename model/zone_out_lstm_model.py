@@ -10,7 +10,7 @@ class zone_out_lstm_model():
         self.mask = tf.placeholder(tf.float32, [None, None])
         self.is_train = tf.placeholder(tf.bool, [])
         self.seq_len = tf.shape(self.embedding_batch)[1]
-        self.initial_lr = tf.constant(0.2, dtype=tf.float32)
+        self.initial_lr = tf.constant(0.02, dtype=tf.float32)
         self.n_labels = 2
         self.weight_initializer = tf.contrib.layers.xavier_initializer()
         self.bias_initializer = tf.constant_initializer(0.0)
@@ -39,8 +39,6 @@ class zone_out_lstm_model():
         out, state = self.ZLSTM(self.embedding_batch[:, i, :], state)
         logits = tf.matmul(out, self.w_2logit) + self.bias_2logit
         one_hot = tf.one_hot(self.labels[:], 2)
-        print(logits.get_shape())
-        print(one_hot.get_shape())
         loss = tf.nn.sigmoid_cross_entropy_with_logits(labels = one_hot, logits = logits)
         loss = tf.reduce_sum(loss, axis = 1)
         loss = loss * self.mask[:, i]
