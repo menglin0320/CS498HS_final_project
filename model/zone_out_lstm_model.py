@@ -26,6 +26,7 @@ class zone_out_lstm_model():
         self.bias_2logit = tf.get_variable("bias_2logit", shape=[self.n_labels],
                                            initializer=self.bias_initializer)
 
+        self.counter_dis = tf.Variable(trainable=False, initial_value=0, dtype=tf.int32)
     # def convert_label2one_hot(self):
     #     labels = self.labels[:,:]
     #     labels = tf.expand_dims(labels, 1)
