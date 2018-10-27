@@ -52,6 +52,7 @@ if __name__ == '__main__':
     data_path = config.data_path
     batch_size = config.batch_size
     checkpoint_dir = config.checkpoint_dir
+    checkpoint_path = config.checkpoint_path
     train_path = config.train_data_path
     test_path = config.test_data_path
     n_epoch = 100000
