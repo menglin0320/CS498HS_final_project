@@ -7,7 +7,7 @@ class zone_out_lstm_model():
         self.dim_hidden = 300
         self.embedding_batch = tf.placeholder(tf.float32, [None, None, word_embedding_size])
         self.labels = tf.placeholder(tf.int32, [None, 1])
-        self.mask = tf.placeholder(tf.float32, [None, None, 1])
+        self.mask = tf.placeholder(tf.float32, [None, None])
         self.is_train = tf.placeholder(tf.bool, [])
         self.seq_len = tf.shape(self.embedding_batch)[1]
         self.initial_lr = tf.constant(0.2, dtype=tf.float32)
@@ -39,11 +39,11 @@ class zone_out_lstm_model():
         logits = tf.matmul(out, self.w_2logit) + self.bias_2logit
         one_hot = tf.one_hot(self.labels[:, i], 2)
         loss = tf.nn.sigmoid_cross_entropy_with_logits(labels = one_hot, logits = logits)
-        loss = loss * self.mask[:, i, :]
+        loss = loss * self.mask[:, i]
         predict = tf.cast(tf.argmax(logits, axis=1), tf.int32)
         # print(predict.get_shape())
         correct_preditions = tf.equal(predict, self.labels[:, i])
-        correct_preditions = correct_preditions * self.mask[:, i, :]
+        correct_preditions = correct_preditions * self.mask[:, i]
         return state, loss, correct_preditions
 
     def build_model(self):
