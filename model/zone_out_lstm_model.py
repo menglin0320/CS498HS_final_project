@@ -66,8 +66,8 @@ class zone_out_lstm_model():
         # do the loop
         [i, state] = tf.while_loop(while_condition, body, [i, state])
 
-        self.loss = tf.mean(self.loss)
-        self.accuracy = tf.mean(self.total_corrects)
+        self.loss = tf.reduce_mean(self.loss)
+        self.accuracy = tf.reduce_mean(self.total_corrects)
         self.lr = tf.train.exponential_decay(self.initial_lr, self.counter_dis, 30000, 0.96, staircase=True)
         self.opt = layers.optimize_loss(loss=self.loss, learning_rate=self.lr,
                                         optimizer=tf.train.AdadeltaOptimizer,
