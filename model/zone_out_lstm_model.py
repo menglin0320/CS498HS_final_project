@@ -42,7 +42,7 @@ class zone_out_lstm_model():
         print(logits.get_shape())
         print(one_hot.get_shape())
         loss = tf.nn.sigmoid_cross_entropy_with_logits(labels = one_hot, logits = logits)
-        print(loss.get_shape())
+        loss = tf.reduce_sum(loss, axis = 1)
         loss = loss * self.mask[:, i]
         predict = tf.cast(tf.argmax(logits, axis=1), tf.int32)
         # print(predict.get_shape())
