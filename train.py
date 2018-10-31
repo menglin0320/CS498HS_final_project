@@ -92,7 +92,7 @@ if __name__ == '__main__':
             train_avg_loss += train_loss
             train_avg_accy += train_accy
 
-            if j == 1:
+            if i == 0:
                 sub_test_avg_loss = 0
                 sub_test_avg_accy = 0
                 for k in range(0, len(data_test_batches)):
