@@ -113,7 +113,7 @@ if __name__ == '__main__':
         train_avg_loss /= rand_permute.shape[0]
         train_avg_accy /= rand_permute.shape[0]
         train_avg_losses.append(train_avg_loss)
-        train_avg_accy.append(train_avg_accy)
+        train_avg_accys.append(train_avg_accy)
 
         for j in range(0, len(data_test_batches)):
             cur_batch = data_test_batches[j]
