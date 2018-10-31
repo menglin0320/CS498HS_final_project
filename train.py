@@ -55,7 +55,7 @@ if __name__ == '__main__':
     checkpoint_path = config.checkpoint_path
     train_path = config.train_data_path
     test_path = config.test_data_path
-    n_epoch = 100000
+    n_epoch = 2
     # TODO write the valid read data function
     data_dict = load_data(train_path, test_path)
     data_train_batches = get_batches(data_dict['train'], batch_size)
@@ -72,6 +72,17 @@ if __name__ == '__main__':
         test_avg_loss = 0
         test_avg_accy = 0
         count = 0
+
+        train_sample_losses = []
+        train_sample_accys = []
+        test_sample_losses = []
+        test_sample_accys = []
+
+        train_avg_losses = []
+        train_avg_accys = []
+        test_avg_losses = []
+        test_avg_accys = []
+
         for j in range(0, rand_permute.shape[0]):
             cur_batch = data_train_batches[rand_permute[j]]
             _, train_loss, train_accy = sess.run([model.opt, model.loss, model.accuracy],
@@ -81,6 +92,20 @@ if __name__ == '__main__':
                                                             model.is_train: True})
             train_avg_loss += train_loss
             train_avg_accy += train_accy
+            if j == 1:
+                for k in range(0, len(data_test_batches)):
+                    cur_batch = data_test_batches[k]
+                    test_loss, test_accy = sess.run([model.loss, model.accuracy],
+                                                    feed_dict={model.embedding_batch: cur_batch['data'],
+                                                               model.labels: cur_batch['label'],
+                                                               model.mask: cur_batch['mask'],
+                                                               model.is_train: False})
+                    test_avg_loss += test_loss
+                    test_avg_accy += test_accy
+                train_sample_losses.append(train_loss/len(data_test_batches))
+                train_sample_accys.append(train_accy/len(data_test_batches))
+                test_sample_losses.append(train_avg_loss/j)
+                test_sample_accys.append(train_avg_accy/j)
         train_avg_loss /= rand_permute.shape[0]
         train_avg_accy /= rand_permute.shape[0]
 
@@ -95,6 +120,28 @@ if __name__ == '__main__':
             test_avg_accy += test_accy
         test_avg_loss /= len(data_test_batches)
         test_avg_accy /= len(data_test_batches)
-
+        test_avg_losses.append(test_avg_loss)
+        test_avg_accys.append(test_avg_accy)
         print('for epoch {}: on training_sample avg loss is {}, avg_accy is {}'.format(i, train_avg_loss, train_avg_accy))
         print('for epoch {}: on test_sample avg loss is {}, avg_accy is {}'.format(i, test_avg_loss, test_avg_accy))
+        train_sample_losses = []
+        train_sample_accys = []
+        test_sample_losses = []
+        test_sample_accys = []
+
+        train_avg_losses = []
+        train_avg_accys = []
+        test_avg_losses = []
+        test_avg_accys = []
+        out_npz_dict = {}
+
+        out_npz_dict['train_sample_losses'] = train_sample_losses
+        out_npz_dict['train_sample_accys'] = train_sample_accys
+        out_npz_dict['test_sample_losses'] = test_sample_losses
+        out_npz_dict['test_sample_accys'] = test_sample_accys
+        out_npz_dict['train_avg_losses'] = train_avg_losses
+        out_npz_dict['train_avg_accys'] = train_avg_accys
+        out_npz_dict['test_avg_losses'] = test_avg_losses
+        out_npz_dict['test_avg_accys'] = test_avg_accys
+
+        dump_pickle('out_npz_dict', out_npz_dict)
