@@ -104,14 +104,16 @@ if __name__ == '__main__':
                                                                model.is_train: False})
                     sub_test_avg_loss += sub_test_loss
                     sub_test_avg_accy += sub_test_accy
-                train_sample_losses.append(train_loss/len(data_test_batches))
-                train_sample_accys.append(train_accy/len(data_test_batches))
-                test_sample_losses.append(sub_test_avg_loss/(j+1))
-                test_sample_accys.append(sub_test_avg_accy/(j+1))
+                train_sample_losses.append(train_loss/j)
+                train_sample_accys.append(train_accy/j)
+                test_sample_losses.append(sub_test_avg_loss/len(data_test_batches))
+                test_sample_accys.append(sub_test_avg_accy/len(data_test_batches))
                 print('batch {} total_batch{}'.format(j, n_batches))
 
         train_avg_loss /= rand_permute.shape[0]
         train_avg_accy /= rand_permute.shape[0]
+        train_avg_losses.append(train_avg_loss)
+        train_avg_accy.append(train_avg_accy)
 
         for j in range(0, len(data_test_batches)):
             cur_batch = data_test_batches[j]
@@ -122,6 +124,7 @@ if __name__ == '__main__':
                                                        model.is_train: False})
             test_avg_loss += test_loss
             test_avg_accy += test_accy
+
         test_avg_loss /= len(data_test_batches)
         test_avg_accy /= len(data_test_batches)
         test_avg_losses.append(test_avg_loss)
