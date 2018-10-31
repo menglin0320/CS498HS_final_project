@@ -108,6 +108,7 @@ if __name__ == '__main__':
                 train_sample_accys.append(train_accy/len(data_test_batches))
                 test_sample_losses.append(sub_test_avg_loss/(j+1))
                 test_sample_accys.append(sub_test_avg_accy/(j+1))
+                print('batch {} total_batch{}'.format(j, n_batches))
 
         train_avg_loss /= rand_permute.shape[0]
         train_avg_accy /= rand_permute.shape[0]
