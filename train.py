@@ -109,7 +109,7 @@ if __name__ == '__main__':
                 train_sample_accys.append(train_accy/len(data_test_batches))
                 test_sample_losses.append(sub_test_avg_loss/j)
                 test_sample_accys.append(sub_test_avg_accy/j)
-                
+
         train_avg_loss /= rand_permute.shape[0]
         train_avg_accy /= rand_permute.shape[0]
 
@@ -128,15 +128,6 @@ if __name__ == '__main__':
         test_avg_accys.append(test_avg_accy)
         print('for epoch {}: on training_sample avg loss is {}, avg_accy is {}'.format(i, train_avg_loss, train_avg_accy))
         print('for epoch {}: on test_sample avg loss is {}, avg_accy is {}'.format(i, test_avg_loss, test_avg_accy))
-        train_sample_losses = []
-        train_sample_accys = []
-        test_sample_losses = []
-        test_sample_accys = []
-
-        train_avg_losses = []
-        train_avg_accys = []
-        test_avg_losses = []
-        test_avg_accys = []
         out_npz_dict = {}
 
         out_npz_dict['train_sample_losses'] = train_sample_losses
