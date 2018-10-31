@@ -63,6 +63,15 @@ if __name__ == '__main__':
 
     model, saver, sess, start_step = initialize_model(checkpoint_dir)
     n_batches = len(data_train_batches)
+    train_sample_losses = []
+    train_sample_accys = []
+    test_sample_losses = []
+    test_sample_accys = []
+
+    train_avg_losses = []
+    train_avg_accys = []
+    test_avg_losses = []
+    test_avg_accys = []
     for i in range(start_step // n_batches, n_epoch):
         rand_permute = np.arange(n_batches)
         np.random.shuffle(rand_permute)
@@ -72,16 +81,6 @@ if __name__ == '__main__':
         test_avg_loss = 0
         test_avg_accy = 0
         count = 0
-
-        train_sample_losses = []
-        train_sample_accys = []
-        test_sample_losses = []
-        test_sample_accys = []
-
-        train_avg_losses = []
-        train_avg_accys = []
-        test_avg_losses = []
-        test_avg_accys = []
 
         for j in range(0, rand_permute.shape[0]):
             cur_batch = data_train_batches[rand_permute[j]]
