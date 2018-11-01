@@ -55,7 +55,7 @@ if __name__ == '__main__':
     checkpoint_path = config.checkpoint_path
     train_path = config.train_data_path
     test_path = config.test_data_path
-    n_epoch = 2
+    n_epoch = 20
     # TODO write the valid read data function
     data_dict = load_data(train_path, test_path)
     data_train_batches = get_batches(data_dict['train'], batch_size)
@@ -84,24 +84,24 @@ if __name__ == '__main__':
 
 
         for j in range(0, rand_permute.shape[0]):
-            if i == 0:
-                sub_test_avg_loss = 0
-                sub_test_avg_accy = 0
-                for k in range(0, len(data_test_batches)):
-                    cur_batch = data_test_batches[k]
-                    sub_test_loss, sub_test_accy = sess.run([model.loss, model.accuracy],
-                                                            feed_dict={model.embedding_batch: cur_batch['data'],
-                                                                       model.labels: cur_batch['label'],
-                                                                       model.mask: cur_batch['mask'],
-                                                                       model.is_train: False})
-                    sub_test_avg_loss += sub_test_loss
-                    sub_test_avg_accy += sub_test_accy
-                train_sample_losses.append(train_avg_loss / (j+1))
-                train_sample_accys.append(train_avg_accy / (j+1))
-                test_sample_losses.append(sub_test_avg_loss / len(data_test_batches))
-                test_sample_accys.append(sub_test_avg_accy / len(data_test_batches))
-                print(sub_test_avg_accy / len(data_test_batches))
-                print('batch {} total_batch{}'.format(j, n_batches))
+            # if i == 0:
+            #     sub_test_avg_loss = 0
+            #     sub_test_avg_accy = 0
+            #     for k in range(0, len(data_test_batches)):
+            #         cur_batch = data_test_batches[k]
+            #         sub_test_loss, sub_test_accy = sess.run([model.loss, model.accuracy],
+            #                                                 feed_dict={model.embedding_batch: cur_batch['data'],
+            #                                                            model.labels: cur_batch['label'],
+            #                                                            model.mask: cur_batch['mask'],
+            #                                                            model.is_train: False})
+            #         sub_test_avg_loss += sub_test_loss
+            #         sub_test_avg_accy += sub_test_accy
+            #     train_sample_losses.append(train_avg_loss / (j+1))
+            #     train_sample_accys.append(train_avg_accy / (j+1))
+            #     test_sample_losses.append(sub_test_avg_loss / len(data_test_batches))
+            #     test_sample_accys.append(sub_test_avg_accy / len(data_test_batches))
+            #     print(sub_test_avg_accy / len(data_test_batches))
+            #     print('batch {} total_batch{}'.format(j, n_batches))
             cur_batch = data_train_batches[rand_permute[j]]
             _, train_loss, train_accy = sess.run([model.opt, model.loss, model.accuracy],
                                                  feed_dict={model.embedding_batch: cur_batch['data'],
