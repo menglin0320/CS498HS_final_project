@@ -3,6 +3,8 @@ import numpy as np
 import os
 import pickle
 from project_configuration import config
+import nltk
+from nltk import tokenize, word_tokenize
 
 def basic_sentence_split(words):
     sentences = []
@@ -16,8 +18,9 @@ def sentence2vector(sentences, word_dict, freqency_dict):
     total_words_appear = 1500000000
     a = 10e-3
     for s in sentences:
+        words = word_tokenize(s)
         tmp = np.zeros(300)
-        for word in s:
+        for word in words:
             tmp += a / (a + freqency_dict[word]/total_words_appear) * np.asarray(word_dict[word])
         tmp /= len(s)
         vectors.append(tmp.tolist())
@@ -34,10 +37,11 @@ def get_dummy_dict(word_dict):
 def words2vecs(in_array, word_dict, freqency_dict):
     output_list = in_array.tolist()
     for i in range(len(in_array)):
-        words = in_array[i][1].split(' ')
-        sentences = basic_sentence_split(words)
+        #words = in_array[i][1].split(' ')
+        #sentences = basic_sentence_split(words)
+        sentences = tokenize.sent_tokenize(in_array[i][0])
         sentence_vectors = sentence2vector(sentences, word_dict, freqency_dict)
-        output_list[i][1] = sentence_vectors
+        output_list[i][0] = sentence_vectors
     return output_list
 
 
@@ -61,17 +65,24 @@ def get_freqency_dict(word_dict, frequency_path=""):
         if (line[0] in word_dict):
             frequency_dict[line[0]] = float(line[1])
 
+    weird_word = {}
     for word in word_dict:
         if word not in frequency_dict:
-            print(word)
+            #print(word)
+            if word not in weird_word:
+                weird_word[word] = 1
+            else:
+                weird_word[word] += 1
             frequency_dict[word]=1
+    print("weird word:{}".format(len(weird_word)))
     return frequency_dict
 
-
+    
 def split_data(config):
     print("In split_data()")
     current_dir = os.path.dirname(os.path.abspath(__file__))
     print("Current Dir:" + current_dir)
+    """
     sample_path = config.processed_data_path
     label_path = config.label_path
     print(sample_path)
@@ -95,48 +106,68 @@ def split_data(config):
     for line in lines3:
         tempo2 = line.strip('\n').split('\t')
         label_list.append(tempo2)
-
+    
     label_array = np.array(label_list)
     label_array_no_id = label_array[:, 1:2]
     combine = np.hstack((data_array, label_array_no_id))
+    """
+    data_path = current_dir + "/data/processed_data/data_pkl"
+    with open(data_path, 'rb') as pkl_f:
+        combine = pickle.load(pkl_f)
+    print("Data loaded")
+    combine = np.array(combine)
     np.random.shuffle(combine)
+    n_samples = len(combine)
+    print(n_samples, combine.shape)
+    """
     print("Label Added")
     del label_array
     del label_array_no_id
     del data_array
     # print(combine2[0][0])
+    """
 
     n_training = int(0.8 * n_samples)
     n_test = n_samples - n_training
     trainn = combine[0:n_training, :]
     testn = combine[n_training:, :]
-
+    print("Data splited")
     text_len_train = np.zeros((trainn.shape[0], 1))
     text_len_test = np.zeros((testn.shape[0], 1))
+    #need to verify
     for i in range(0, trainn.shape[0]):
-        text_len_train[i] = trainn[i][1].count(' ') + 1
+        text_len_train[i] = trainn[i][0].count(' ') + 1
     for i in range(0, testn.shape[0]):
-        text_len_test[i] = testn[i][1].count(' ') + 1
+        text_len_test[i] = testn[i][0].count(' ') + 1
     # print(text_len_train[0][0])
     trainn = np.hstack((trainn, text_len_train))
     testn = np.hstack((testn, text_len_test))
     del text_len_train
     del text_len_test
     del combine
+    print("length added")
+    print(trainn.shape)
+    print(testn.shape)
     # print(trainn[0][6],trainn[1][6])
     # print(trainn[:, 6].astype(np.float32))
-    trainn = trainn[trainn[:, 6].astype(np.float32).argsort()]
+    trainn = trainn[trainn[:, 2].astype(np.float32).argsort()]
     # for sample in trainn:
     #     print(sample[6])
-    testn = testn[testn[:, 6].astype(np.float32).argsort()]
+    testn = testn[testn[:, 2].astype(np.float32).argsort()]
 
     print("Data split Done")
     # print(trainn[0])
-    word_embedding_path = current_dir + '/resource/word_embeddings.json'
-    word_dict = get_word2vec_dict(word_embedding_path)
+    
+    #word_embedding_path = current_dir + '/resource/word_embeddings.json'
+    #word_dict = get_word2vec_dict(word_embedding_path)
+    word_dict_path = current_dir + '/resource/word_dict_pkl'
+    with open(word_dict_path, 'rb') as pkl_f:
+        word_dict = pickle.load(pkl_f)
     frequency_path = current_dir + '/resource/relevant_corpus2.txt'
     freqency_dict = get_freqency_dict(word_dict, frequency_path)
 
+    print("freq, word_vec loaded")
+    
     trainn = words2vecs(trainn, word_dict, freqency_dict)
     testn = words2vecs(testn, word_dict, freqency_dict)
 
