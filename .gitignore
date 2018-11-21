@@ -1,2 +1,2 @@
 *.pyc
-*.pkl
+resource/word_dict_pkl
