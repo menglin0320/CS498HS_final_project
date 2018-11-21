@@ -1,2 +1,4 @@
 *.pyc
 resource/word_dict_pkl
+Posts.xml
+glove.42B.300d.txt
