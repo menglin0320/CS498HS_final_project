@@ -1,10 +1,46 @@
 import json
 import numpy as np
-import os
 import pickle
 from project_configuration import config
-import nltk
 from nltk import tokenize, word_tokenize
+from sklearn.decomposition import TruncatedSVD
+# U, S, Vt = randomized_svd(X, n_components=1)
+def compute_pc(X,npc=1):
+    """
+    Compute the principal components. DO NOT MAKE THE DATA ZERO MEAN!
+    :param X: X[i,:] is a data point
+    :param npc: number of principal components to remove
+    :return: component_[i,:] is the i-th pc
+    """
+    svd = TruncatedSVD(n_components=npc, n_iter=7, random_state=0)
+    svd.fit(X)
+    return svd.components_
+
+def PCA_trans(files):
+    ind_list = []
+    all_vecs = []
+    for i, file in enumerate(files):
+        for sentence_vec in file[0]:
+            all_vecs.append(sentence_vec)
+            ind_list.append(i)
+    all_file_matrix = np.asarray(all_vecs).transpose()
+    pc = compute_pc(all_file_matrix, npc = 1)
+    all_file_matrix = all_file_matrix - all_file_matrix.dot(pc.transpose()) * pc
+
+    previous_ind = ind_list[0]
+    cur_list = []
+
+    for i, ind in enumerate(ind_list):
+        if ind == previous_ind:
+            cur_list.append(all_file_matrix[:, i])
+        else:
+            files[previous_ind][0] = cur_list
+            cur_list = []
+            cur_list.append(all_file_matrix[:, i])
+            previous_ind = ind
+    cur_list.append(all_file_matrix[:, i])
+    files[previous_ind][0] = cur_list
+    return files
 
 def basic_sentence_split(words):
     sentences = []
@@ -16,12 +52,19 @@ def basic_sentence_split(words):
 def sentence2vector(sentences, word_dict, freqency_dict):
     vectors = []
     total_words_appear = 1500000000
-    a = 10e-3
+    a = 1e-4
     for s in sentences:
+        s = s.replace('https:','')
+        s = s.replace('http:','')
         words = word_tokenize(s)
         tmp = np.zeros(300)
         for word in words:
-            tmp += a / (a + freqency_dict[word]/total_words_appear) * np.asarray(word_dict[word])
+            try:
+                # weight = a / (a + freqency_dict[word] / total_words_appear)
+                # cur_embedding = np.asarray(word_dict[word])
+                tmp += a / (a + freqency_dict[word]/total_words_appear) * np.asarray(word_dict[word])
+            except:
+                print('{} not on frequency_dict or word_dict, discarded'.format(word))
         tmp /= len(s)
         vectors.append(tmp.tolist())
     return vectors
@@ -37,8 +80,6 @@ def get_dummy_dict(word_dict):
 def words2vecs(in_array, word_dict, freqency_dict):
     output_list = in_array.tolist()
     for i in range(len(in_array)):
-        #words = in_array[i][1].split(' ')
-        #sentences = basic_sentence_split(words)
         sentences = tokenize.sent_tokenize(in_array[i][0])
         sentence_vectors = sentence2vector(sentences, word_dict, freqency_dict)
         output_list[i][0] = sentence_vectors
@@ -79,56 +120,15 @@ def get_freqency_dict(word_dict, frequency_path=""):
 
     
 def split_data(config):
-    print("In split_data()")
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    print("Current Dir:" + current_dir)
-    """
-    sample_path = config.processed_data_path
-    label_path = config.label_path
-    print(sample_path)
-    print(label_path)
-
-    with open(sample_path, 'r') as f1:
-        lines = f1.readlines()
-    data_list = []
-    for line in lines:
-        tempo1 = line.strip('\n').split('\t')
-        data_list.append(tempo1)
-    # temp2=shuffle(lines2)
-    n_samples = len(data_list)
-    data_array = np.array(data_list)
-
-    print("Attribute Read Done")
-
-    with open(label_path, 'r') as f2:
-        lines3 = f2.readlines()
-    label_list = []
-    for line in lines3:
-        tempo2 = line.strip('\n').split('\t')
-        label_list.append(tempo2)
-    
-    label_array = np.array(label_list)
-    label_array_no_id = label_array[:, 1:2]
-    combine = np.hstack((data_array, label_array_no_id))
-    """
-    data_path = current_dir + "/data/processed_data/data_pkl"
+    data_path = config.raw_data_path
     with open(data_path, 'rb') as pkl_f:
         combine = pickle.load(pkl_f)
-    print("Data loaded")
+
     combine = np.array(combine)
     np.random.shuffle(combine)
     n_samples = len(combine)
-    print(n_samples, combine.shape)
-    """
-    print("Label Added")
-    del label_array
-    del label_array_no_id
-    del data_array
-    # print(combine2[0][0])
-    """
 
     n_training = int(0.8 * n_samples)
-    n_test = n_samples - n_training
     trainn = combine[0:n_training, :]
     testn = combine[n_training:, :]
     print("Data splited")
@@ -145,9 +145,6 @@ def split_data(config):
     del text_len_train
     del text_len_test
     del combine
-    print("length added")
-    print(trainn.shape)
-    print(testn.shape)
     # print(trainn[0][6],trainn[1][6])
     # print(trainn[:, 6].astype(np.float32))
     trainn = trainn[trainn[:, 2].astype(np.float32).argsort()]
@@ -158,19 +155,28 @@ def split_data(config):
     print("Data split Done")
     # print(trainn[0])
     
-    #word_embedding_path = current_dir + '/resource/word_embeddings.json'
     #word_dict = get_word2vec_dict(word_embedding_path)
-    word_dict_path = current_dir + '/resource/word_dict_pkl'
+    word_dict_path = config.word_embedding_path
     with open(word_dict_path, 'rb') as pkl_f:
         word_dict = pickle.load(pkl_f)
-    frequency_path = current_dir + '/resource/relevant_corpus2.txt'
+    tmp_dict = {}
+    for word, embedding in word_dict.items():
+        embed_list = embedding.split(' ')
+        embed_list = [float(elem) for elem in embed_list]
+        tmp_dict[word] = embed_list
+    word_dict = tmp_dict
+    del tmp_dict
+
+
+    frequency_path = config.word_frequence_json
     freqency_dict = get_freqency_dict(word_dict, frequency_path)
 
     print("freq, word_vec loaded")
     
     trainn = words2vecs(trainn, word_dict, freqency_dict)
+    trainn = PCA_trans(trainn)
     testn = words2vecs(testn, word_dict, freqency_dict)
-
+    testn = PCA_trans(testn)
     print("Word 2 Vec Done")
 
     train_out_path = config.train_data_path
@@ -187,13 +193,4 @@ def split_data(config):
     #print(tmp[0])
 
 if __name__ == '__main__':
-    # print("Hello!")
-    # current_dir = os.path.dirname(os.path.abspath(__file__))
-    # trainn = np.array([['17995', 'thought', '1952', 'A', '0.24', '0', '1.0']])
-    # word_embedding_path = current_dir + '/resource/word_embeddings.json'
-    # word_dict = get_word2vec_dict(word_embedding_path)
-    # frequency_path = current_dir + '/resource/relevant_corpus2.txt'
-    # freqency_dict = get_freqency_dict(word_dict, frequency_path)
-    #
-    # trainn = words2vecs(trainn, word_dict, freqency_dict)
     split_data(config)
