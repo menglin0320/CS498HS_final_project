@@ -42,7 +42,7 @@ class zone_out_lstm_model():
 
     def one_iteration(self, state, i, predict):
         out, state = self.ZLSTM(self.embedding_batch[:, i, :], state)
-        logits = tf.matmul(out, self.w_2lstminit) + self.bias_2lstminit
+        logits = tf.matmul(out, self.w_2logit) + self.bias_2logit
         one_hot = tf.one_hot(self.labels[:], 2)
         loss = tf.nn.sigmoid_cross_entropy_with_logits(labels = one_hot, logits = logits)
         loss = tf.reduce_sum(loss, axis = 1)
@@ -58,7 +58,7 @@ class zone_out_lstm_model():
         with tf.variable_scope('classifier'):
             in_mean = tf.reduce_sum(self.embedding_batch, axis = 1) / \
                       tf.tile(tf.expand_dims(tf.reduce_sum(self.mask,1), 1), [1, 300])
-            zero_state = tf.matmul(in_mean, self.w_2logit) + self.bias_2logit
+            zero_state = tf.matmul(in_mean, self.w_2lstminit) + self.bias_2lstminit
             print(zero_state.get_shape())
             # zero_state = self.ZLSTM.zero_state(self.batch_size, dtype=tf.float32)
             predict, state, loss, correct_preditions = self.one_iteration(zero_state, 0, 0)
