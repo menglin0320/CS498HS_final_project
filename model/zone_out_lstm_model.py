@@ -32,9 +32,9 @@ class zone_out_lstm_model():
         self.bias_2c = tf.get_variable("bias_2c", shape=[self.dim_hidden],
                                            initializer=self.bias_initializer)
 
-        self.w_2c2 = tf.get_variable('w_2c', shape=[300, self.dim_hidden],
+        self.w_2c2 = tf.get_variable('w_2c2', shape=[300, self.dim_hidden],
                                     initializer=self.weight_initializer)
-        self.bias_2c2 = tf.get_variable("bias_2c", shape=[self.dim_hidden],
+        self.bias_2c2 = tf.get_variable("bias_2c2", shape=[self.dim_hidden],
                                        initializer=self.bias_initializer)
 
         self.w_2h = tf.get_variable('w_2h', shape=[300, self.dim_hidden],
