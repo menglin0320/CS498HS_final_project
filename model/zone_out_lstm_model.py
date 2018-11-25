@@ -26,6 +26,11 @@ class zone_out_lstm_model():
         self.bias_2logit = tf.get_variable("bias_2logit", shape=[self.n_labels],
                                            initializer=self.bias_initializer)
 
+        self.w_2lstminit = tf.get_variable('w_2lstminit', shape=[300, self.dim_hidden],
+                                        initializer=self.weight_initializer)
+        self.bias_2lstminit = tf.get_variable("bias_2lstminit", shape=[self.dim_hidden],
+                                           initializer=self.bias_initializer)
+
         self.counter_dis = tf.Variable(trainable=False, initial_value=0, dtype=tf.int32)
     # def convert_label2one_hot(self):
     #     labels = self.labels[:,:]
@@ -51,7 +56,10 @@ class zone_out_lstm_model():
 
     def build_model(self):
         with tf.variable_scope('classifier'):
-            zero_state = self.ZLSTM.zero_state(self.batch_size, dtype=tf.float32)
+            in_mean = tf.reduce_sum(self.embedding_batch, axis = 1) / \
+                      tf.tile(tf.expand_dims(tf.reduce_sum(self.mask,1), 1), [1, 300])
+            zero_state = tf.matmul(in_mean, self.w_2logit) + self.bias_2logit
+            # zero_state = self.ZLSTM.zero_state(self.batch_size, dtype=tf.float32)
             predict, state, loss, correct_preditions = self.one_iteration(zero_state, 0, 0)
             total_loss = loss
             total_corrects = correct_preditions

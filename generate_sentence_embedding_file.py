@@ -4,8 +4,10 @@ import pickle
 from project_configuration import config
 from nltk import tokenize, word_tokenize
 from sklearn.decomposition import TruncatedSVD
+
+
 # U, S, Vt = randomized_svd(X, n_components=1)
-def compute_pc(X,npc=1):
+def compute_pc(X, npc=1):
     """
     Compute the principal components. DO NOT MAKE THE DATA ZERO MEAN!
     :param X: X[i,:] is a data point
@@ -16,51 +18,33 @@ def compute_pc(X,npc=1):
     svd.fit(X)
     return svd.components_
 
-def PCA_trans(trainn, testn):
-    train_ind_list = []
-    test_ind_list = []
+
+def PCA_trans(files):
+    ind_list = []
     all_vecs = []
-
-    for i, file in enumerate(trainn):
+    for i, file in enumerate(files):
         for sentence_vec in file[0]:
             all_vecs.append(sentence_vec)
-            train_ind_list.append(i)
-    n_train = len(trainn)
-    for i, file in enumerate(testn):
-        for sentence_vec in file[0]:
-            all_vecs.append(sentence_vec)
-            test_ind_list.append(i)
-
+            ind_list.append(i)
     all_file_matrix = np.asarray(all_vecs).transpose()
-    pc = compute_pc(all_file_matrix, npc = 1)
+    pc = compute_pc(all_file_matrix, npc=1)
     all_file_matrix = all_file_matrix - all_file_matrix.dot(pc.transpose()) * pc
 
-    previous_ind = train_ind_list[0]
+    previous_ind = ind_list[0]
     cur_list = []
 
-    for i, ind in enumerate(train_ind_list):
+    for i, ind in enumerate(ind_list):
         if ind == previous_ind:
             cur_list.append(all_file_matrix[:, i])
         else:
-            trainn[previous_ind][0] = cur_list
+            files[previous_ind][0] = cur_list
             cur_list = []
             cur_list.append(all_file_matrix[:, i])
             previous_ind = ind
     cur_list.append(all_file_matrix[:, i])
-    trainn[previous_ind][0] = cur_list
+    files[previous_ind][0] = cur_list
+    return files
 
-    previous_ind = test_ind_list[0]
-    for i, ind in enumerate(test_ind_list):
-        if ind == previous_ind:
-            cur_list.append(all_file_matrix[:, i + n_train])
-        else:
-            testn[previous_ind][0] = cur_list
-            cur_list = []
-            cur_list.append(all_file_matrix[:, i + n_train])
-            previous_ind = ind
-    cur_list.append(all_file_matrix[:, i + n_train])
-    testn[previous_ind][0] = cur_list
-    return trainn, testn
 
 def basic_sentence_split(words):
     sentences = []
@@ -74,15 +58,15 @@ def sentence2vector(sentences, word_dict, freqency_dict):
     total_words_appear = 1500000000
     a = 1e-4
     for s in sentences:
-        s = s.replace('https:','')
-        s = s.replace('http:','')
+        s = s.replace('https:', '')
+        s = s.replace('http:', '')
         words = word_tokenize(s)
         tmp = np.zeros(300)
         for word in words:
             try:
                 # weight = a / (a + freqency_dict[word] / total_words_appear)
                 # cur_embedding = np.asarray(word_dict[word])
-                tmp += a / (a + freqency_dict[word]/total_words_appear) * np.asarray(word_dict[word])
+                tmp += a / (a + freqency_dict[word] / total_words_appear) * np.asarray(word_dict[word])
             except:
                 print('{} not on frequency_dict or word_dict, discarded'.format(word))
         tmp /= len(s)
@@ -129,16 +113,16 @@ def get_freqency_dict(word_dict, frequency_path=""):
     weird_word = {}
     for word in word_dict:
         if word not in frequency_dict:
-            #print(word)
+            # print(word)
             if word not in weird_word:
                 weird_word[word] = 1
             else:
                 weird_word[word] += 1
-            frequency_dict[word]=1
+            frequency_dict[word] = 1
     print("weird word:{}".format(len(weird_word)))
     return frequency_dict
 
-    
+
 def split_data(config):
     data_path = config.raw_data_path
     with open(data_path, 'rb') as pkl_f:
@@ -152,9 +136,9 @@ def split_data(config):
     trainn = combine[0:n_training, :]
     testn = combine[n_training:, :]
     print("Data splited")
-        # print(trainn[0])
-    
-    #word_dict = get_word2vec_dict(word_embedding_path)
+    # print(trainn[0])
+
+    # word_dict = get_word2vec_dict(word_embedding_path)
     word_dict_path = config.word_embedding_path
     with open(word_dict_path, 'rb') as pkl_f:
         word_dict = pickle.load(pkl_f)
@@ -166,15 +150,15 @@ def split_data(config):
     word_dict = tmp_dict
     del tmp_dict
 
-
     frequency_path = config.word_frequence_json
     freqency_dict = get_freqency_dict(word_dict, frequency_path)
 
     print("freq, word_vec loaded")
-    
+
     trainn = words2vecs(trainn, word_dict, freqency_dict)
+    trainn = PCA_trans(trainn)
     testn = words2vecs(testn, word_dict, freqency_dict)
-    trainn,testn = PCA_trans(trainn,testn)
+    testn = PCA_trans(testn)
     print("Word 2 Vec Done")
     text_len_train = np.zeros((len(trainn), 1))
     text_len_test = np.zeros((len(testn), 1))
@@ -205,10 +189,11 @@ def split_data(config):
     testfile = open(test_out_path, 'wb')
     pickle.dump(testn, testfile)
     testfile.close()
-    
-    #testfile = open(test_out_path, 'rb')
-    #tmp = pickle.load(testfile)
-    #print(tmp[0])
+
+    # testfile = open(test_out_path, 'rb')
+    # tmp = pickle.load(testfile)
+    # print(tmp[0])
+
 
 if __name__ == '__main__':
     split_data(config)
