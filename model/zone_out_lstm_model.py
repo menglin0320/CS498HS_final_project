@@ -51,7 +51,9 @@ class zone_out_lstm_model():
     def build_model(self):
         with tf.variable_scope('classifier'):
             zero_state = self.ZLSTM.zero_state(self.batch_size, dtype=tf.float32)
-            state, loss, correct_preditions = self.one_iteration(zero_state, 0)
+            predicts = []
+            predict, state, loss, correct_preditions = self.one_iteration(zero_state, 0)
+            predicts.append(predict)
             total_loss = loss
             total_corrects = correct_preditions
             tf.get_variable_scope().reuse_variables()
@@ -59,7 +61,6 @@ class zone_out_lstm_model():
             i = tf.constant(1)
 
             while_condition = lambda i, N1, N2, N3, N4: tf.less(i, self.seq_len)
-            predicts = []
             def body(i, state, total_corrects, total_loss, predicts):
                 predict, state, loss, correct_preditions = self.one_iteration(state, i)
                 total_corrects += correct_preditions
