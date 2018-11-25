@@ -26,11 +26,14 @@ class zone_out_lstm_model():
         self.bias_2logit = tf.get_variable("bias_2logit", shape=[self.n_labels],
                                            initializer=self.bias_initializer)
 
-        self.w_2lstminit = tf.get_variable('w_2lstminit', shape=[300, self.dim_hidden],
+        self.w_2c = tf.get_variable('w_2c', shape=[300, self.dim_hidden],
                                         initializer=self.weight_initializer)
-        self.bias_2lstminit = tf.get_variable("bias_2lstminit", shape=[self.dim_hidden],
+        self.bias_2c = tf.get_variable("bias_2c", shape=[self.dim_hidden],
                                            initializer=self.bias_initializer)
-
+        self.w_2h = tf.get_variable('w_2h', shape=[300, self.dim_hidden],
+                                    initializer=self.weight_initializer)
+        self.bias_2h = tf.get_variable("bias_2h", shape=[self.dim_hidden],
+                                       initializer=self.bias_initializer)
         self.counter_dis = tf.Variable(trainable=False, initial_value=0, dtype=tf.int32)
     # def convert_label2one_hot(self):
     #     labels = self.labels[:,:]
@@ -58,7 +61,9 @@ class zone_out_lstm_model():
         with tf.variable_scope('classifier'):
             in_mean = tf.reduce_sum(self.embedding_batch, axis = 1) / \
                       tf.tile(tf.expand_dims(tf.reduce_sum(self.mask,1), 1), [1, 300])
-            zero_state = tf.matmul(in_mean, self.w_2lstminit) + self.bias_2lstminit
+            init_c = tf.matmul(in_mean, self.w_2c) + self.bias_2c
+            init_h = tf.matmul(in_mean, self.w_2h) + self.bias_2h
+            zero_state = [init_c, init_h]
             print(zero_state.get_shape())
             # zero_state = self.ZLSTM.zero_state(self.batch_size, dtype=tf.float32)
             predict, state, loss, correct_preditions = self.one_iteration(zero_state, 0, 0)
