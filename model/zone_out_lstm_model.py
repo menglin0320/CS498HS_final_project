@@ -42,10 +42,11 @@ class zone_out_lstm_model():
         self.bias_2h = tf.get_variable("bias_2h", shape=[self.dim_hidden],
                                        initializer=self.bias_initializer)
 
-        self.w_2c2 = tf.get_variable('w_2c', shape=[300, self.dim_hidden],
+        self.w_2h2 = tf.get_variable('w_2h2', shape=[300, self.dim_hidden],
                                     initializer=self.weight_initializer)
-        self.bias_2c2 = tf.get_variable("bias_2c", shape=[self.dim_hidden],
+        self.bias_2h2 = tf.get_variable("bias_2h2", shape=[self.dim_hidden],
                                        initializer=self.bias_initializer)
+
         self.counter_dis = tf.Variable(trainable=False, initial_value=0, dtype=tf.int32)
     # def convert_label2one_hot(self):
     #     labels = self.labels[:,:]
