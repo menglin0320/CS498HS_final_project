@@ -59,8 +59,7 @@ if __name__ == '__main__':
     checkpoint_path = config.checkpoint_path
     train_path = config.train_data_path
     test_path = config.test_data_path
-    n_epoch = 20
-    # TODO write the valid read data function
+    n_epoch = 1000
     data_dict = load_data(train_path, test_path)
     data_train_batches = get_batches(data_dict['train'], batch_size)
     data_test_batches = get_batches(data_dict['test'], batch_size)
