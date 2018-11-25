@@ -35,25 +35,24 @@ class zone_out_lstm_model():
     #     onehot = tf.sparse_to_dense(sparse, tf.stack([self.batch_size, self.n_labels]), 1.0, 0.0)
     #     return onehot
 
-    def one_iteration(self, state, i):
+    def one_iteration(self, state, i, predict):
         out, state = self.ZLSTM(self.embedding_batch[:, i, :], state)
         logits = tf.matmul(out, self.w_2logit) + self.bias_2logit
         one_hot = tf.one_hot(self.labels[:], 2)
         loss = tf.nn.sigmoid_cross_entropy_with_logits(labels = one_hot, logits = logits)
         loss = tf.reduce_sum(loss, axis = 1)
         loss = loss * self.mask[:, i]
-        predict = tf.cast(tf.argmax(logits, axis=1), tf.int32)
+        cur_predict = tf.cast(tf.argmax(logits, axis=1), tf.int32)
+        predict = cur_predict * self.mask[:, i] + predict
         # print(predict.get_shape())
-        correct_preditions = tf.equal(predict, self.labels[:])
+        correct_preditions = tf.equal(cur_predict, self.labels[:])
         correct_preditions = tf.cast(correct_preditions, tf.float32) * self.mask[:, i]
         return predict, state, loss, correct_preditions
 
     def build_model(self):
         with tf.variable_scope('classifier'):
             zero_state = self.ZLSTM.zero_state(self.batch_size, dtype=tf.float32)
-            predicts = []
             predict, state, loss, correct_preditions = self.one_iteration(zero_state, 0)
-            predicts.append(predict)
             total_loss = loss
             total_corrects = correct_preditions
             tf.get_variable_scope().reuse_variables()
@@ -61,16 +60,15 @@ class zone_out_lstm_model():
             i = tf.constant(1)
 
             while_condition = lambda i, N1, N2, N3, N4: tf.less(i, self.seq_len)
-            def body(i, state, total_corrects, total_loss, predicts):
-                predict, state, loss, correct_preditions = self.one_iteration(state, i)
+            def body(i, state, total_corrects, total_loss, predict):
+                predict, state, loss, correct_preditions = self.one_iteration(state, i, predict)
                 total_corrects += correct_preditions
                 total_loss += loss
-                predicts.append(predict)
-                return [i + 1, state, total_corrects, total_loss, predicts]
+                return [i + 1, state, total_corrects, total_loss, predict]
 
             # do the loop
-            [i, state, total_corrects, total_loss, predicts] = tf.while_loop(while_condition, body, [i, state, total_corrects, loss, predicts])
-        self.predicts = predicts
+            [i, state, total_corrects, total_loss, predict] = tf.while_loop(while_condition, body, [i, state, total_corrects, loss, predict])
+        self.predicts = predict
         self.total_corrects = total_corrects
         self.loss = total_loss
         self.loss = tf.reduce_mean(self.loss)
