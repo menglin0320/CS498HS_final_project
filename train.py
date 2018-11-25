@@ -42,7 +42,6 @@ def load_data(train_path, test_path):
         full_data['train'].append({})
         full_data['train'][i]['attributes'] = cell[0]
         # print('real_length{} and leangth used for sorting {}'.format(len(cell[1]),cell[6]))
-        print(cell[1], bool2int(cell[1]))
         full_data['train'][i]['label'] = bool2int(cell[1])
 
     for i, cell in enumerate(test_data_raw):

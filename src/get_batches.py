@@ -32,7 +32,6 @@ def get_batches(data_, batch_size):
         cur_batch_start = i * batch_size
         cur_batch_size = min(batch_size, len(data_) - i * batch_size)
         max_n_embed = len(data_[cur_batch_start + cur_batch_size - 1]['attributes'])
-        print(max_n_embed)
         cur_batch['data'] = []
         cur_batch['label'] = []
         cur_batch['mask'] = []
