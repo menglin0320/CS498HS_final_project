@@ -59,6 +59,7 @@ class zone_out_lstm_model():
             in_mean = tf.reduce_sum(self.embedding_batch, axis = 1) / \
                       tf.tile(tf.expand_dims(tf.reduce_sum(self.mask,1), 1), [1, 300])
             zero_state = tf.matmul(in_mean, self.w_2logit) + self.bias_2logit
+            print(zero_state.get_shape())
             # zero_state = self.ZLSTM.zero_state(self.batch_size, dtype=tf.float32)
             predict, state, loss, correct_preditions = self.one_iteration(zero_state, 0, 0)
             total_loss = loss
