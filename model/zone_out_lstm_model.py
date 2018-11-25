@@ -65,7 +65,6 @@ class zone_out_lstm_model():
                 total_corrects += correct_preditions
                 total_loss += loss
                 return [i + 1, state, total_corrects, total_loss, predict]
-
             # do the loop
             [i, state, total_corrects, total_loss, predict] = tf.while_loop(while_condition, body, [i, state, total_corrects, loss, predict])
         self.predicts = predict
