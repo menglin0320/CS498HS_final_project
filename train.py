@@ -38,12 +38,12 @@ def load_data(train_path, test_path):
         full_data['train'].append({})
         full_data['train'][i]['attributes'] = cell[0]
         # print('real_length{} and leangth used for sorting {}'.format(len(cell[1]),cell[6]))
-        full_data['train'][i]['label'] = int(cell[1])
+        full_data['train'][i]['label'] = cell[1] * 1
 
     for i, cell in enumerate(test_data_raw):
         full_data['test'].append({})
         full_data['test'][i]['attributes'] = cell[0]
-        full_data['test'][i]['label'] = int(cell[1])
+        full_data['test'][i]['label'] = cell[1] * 1
 
     return full_data
 
