@@ -63,8 +63,8 @@ if __name__ == '__main__':
     data_dict = load_data(train_path, test_path)
     data_train_batches = get_batches(data_dict['train'], batch_size)
     data_test_batches = get_batches(data_dict['test'], batch_size)
-
-    model, saver, sess, start_step = initialize_model(checkpoint_dir)
+    with tf.device('/gpu:0'):
+        model, saver, sess, start_step = initialize_model(checkpoint_dir)
     n_batches = len(data_train_batches)
     train_sample_losses = []
     train_sample_accys = []
