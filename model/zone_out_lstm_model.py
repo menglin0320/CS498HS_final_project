@@ -70,7 +70,10 @@ class zone_out_lstm_model():
         self.predicts = predict
         self.total_corrects = total_corrects
         self.loss = total_loss
-        self.loss = tf.reduce_mean(self.loss)
+        tv = tf.trainable_variables()
+        regularization_cost = tf.reduce_sum([tf.nn.l2_loss(v) for v in tv])
+        self.loss = tf.reduce_mean(self.loss) + regularization_cost
+
         self.accuracy = tf.reduce_mean(self.total_corrects)
         self.lr = tf.train.exponential_decay(self.initial_lr, self.counter_dis, 30000, 0.96, staircase=True)
         self.opt = layers.optimize_loss(loss=self.loss, learning_rate=self.lr,
