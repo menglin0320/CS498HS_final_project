@@ -11,22 +11,28 @@ def padding_samples(passage_embedding, max_n_embed):
         passage_embedding.append([0] * 300)
     return passage_embedding
 
-
 def cvt2onehot(values):
     n_values = np.max(values) + 1
     ret = np.eye(n_values)[values]
     return ret
 
+def resort(data_set):
+    for i in range(0, len(data_set)):
+        data_set[i][2] = len(data_set[i][0]) + 1
+    data_set = data_set[data_set[:, 2].astype(np.float32).argsort()]
+    return data_set
 
 def get_batches(data_, batch_size):
     # print(batch_size)
     ret = []
     i = 0
+    data_ = resort(data_)
     while (batch_size * i < len(data_)):
         cur_batch = {}
         cur_batch_start = i * batch_size
         cur_batch_size = min(batch_size, len(data_) - i * batch_size)
         max_n_embed = len(data_[cur_batch_start + cur_batch_size - 1]['attributes'])
+        print(max_n_embed)
         cur_batch['data'] = []
         cur_batch['label'] = []
         cur_batch['mask'] = []

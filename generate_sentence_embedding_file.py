@@ -132,28 +132,7 @@ def split_data(config):
     trainn = combine[0:n_training, :]
     testn = combine[n_training:, :]
     print("Data splited")
-    text_len_train = np.zeros((trainn.shape[0], 1))
-    text_len_test = np.zeros((testn.shape[0], 1))
-    #need to verify
-    for i in range(0, trainn.shape[0]):
-        text_len_train[i] = trainn[i][0].count(' ') + 1
-    for i in range(0, testn.shape[0]):
-        text_len_test[i] = testn[i][0].count(' ') + 1
-    # print(text_len_train[0][0])
-    trainn = np.hstack((trainn, text_len_train))
-    testn = np.hstack((testn, text_len_test))
-    del text_len_train
-    del text_len_test
-    del combine
-    # print(trainn[0][6],trainn[1][6])
-    # print(trainn[:, 6].astype(np.float32))
-    trainn = trainn[trainn[:, 2].astype(np.float32).argsort()]
-    # for sample in trainn:
-    #     print(sample[6])
-    testn = testn[testn[:, 2].astype(np.float32).argsort()]
-
-    print("Data split Done")
-    # print(trainn[0])
+        # print(trainn[0])
     
     #word_dict = get_word2vec_dict(word_embedding_path)
     word_dict_path = config.word_embedding_path
@@ -178,7 +157,27 @@ def split_data(config):
     testn = words2vecs(testn, word_dict, freqency_dict)
     testn = PCA_trans(testn)
     print("Word 2 Vec Done")
+    text_len_train = np.zeros((len(trainn), 1))
+    text_len_test = np.zeros((len(testn), 1))
+    # need to verify
+    for i in range(0, len(trainn)):
+        text_len_train[i] = len(trainn[i][0]) + 1
+    for i in range(0, len(testn)):
+        text_len_test[i] = len(testn[i][0]) + 1
+    # print(text_len_train[0][0])
+    trainn = np.hstack((trainn, text_len_train))
+    testn = np.hstack((testn, text_len_test))
+    del text_len_train
+    del text_len_test
+    del combine
+    print("Sort files down")
 
+    # print(trainn[0][6],trainn[1][6])
+    # print(trainn[:, 6].astype(np.float32))
+    trainn = trainn[trainn[:, 2].astype(np.float32).argsort()]
+    # for sample in trainn:
+    #     print(sample[6])
+    testn = testn[testn[:, 2].astype(np.float32).argsort()]
     train_out_path = config.train_data_path
     trainfile = open(train_out_path, 'wb')
     pickle.dump(trainn, trainfile)
