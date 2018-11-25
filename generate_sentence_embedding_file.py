@@ -16,31 +16,51 @@ def compute_pc(X,npc=1):
     svd.fit(X)
     return svd.components_
 
-def PCA_trans(files):
-    ind_list = []
+def PCA_trans(trainn, testn):
+    train_ind_list = []
+    test_ind_list = []
     all_vecs = []
-    for i, file in enumerate(files):
+
+    for i, file in enumerate(trainn):
         for sentence_vec in file[0]:
             all_vecs.append(sentence_vec)
-            ind_list.append(i)
+            train_ind_list.append(i)
+    n_train = len(trainn)
+    for i, file in enumerate(testn):
+        for sentence_vec in file[0]:
+            all_vecs.append(sentence_vec)
+            test_ind_list.append(i)
+
     all_file_matrix = np.asarray(all_vecs).transpose()
     pc = compute_pc(all_file_matrix, npc = 1)
     all_file_matrix = all_file_matrix - all_file_matrix.dot(pc.transpose()) * pc
 
-    previous_ind = ind_list[0]
+    previous_ind = train_ind_list[0]
     cur_list = []
 
-    for i, ind in enumerate(ind_list):
+    for i, ind in enumerate(train_ind_list):
         if ind == previous_ind:
             cur_list.append(all_file_matrix[:, i])
         else:
-            files[previous_ind][0] = cur_list
+            trainn[previous_ind][0] = cur_list
             cur_list = []
             cur_list.append(all_file_matrix[:, i])
             previous_ind = ind
     cur_list.append(all_file_matrix[:, i])
-    files[previous_ind][0] = cur_list
-    return files
+    trainn[previous_ind][0] = cur_list
+
+    previous_ind = test_ind_list[0]
+    for i, ind in enumerate(test_ind_list):
+        if ind == previous_ind:
+            cur_list.append(all_file_matrix[:, i + n_train])
+        else:
+            testn[previous_ind][0] = cur_list
+            cur_list = []
+            cur_list.append(all_file_matrix[:, i + n_train])
+            previous_ind = ind
+    cur_list.append(all_file_matrix[:, i + n_train])
+    testn[previous_ind][0] = cur_list
+    return trainn, testn
 
 def basic_sentence_split(words):
     sentences = []
@@ -153,9 +173,8 @@ def split_data(config):
     print("freq, word_vec loaded")
     
     trainn = words2vecs(trainn, word_dict, freqency_dict)
-    trainn = PCA_trans(trainn)
     testn = words2vecs(testn, word_dict, freqency_dict)
-    testn = PCA_trans(testn)
+    trainn,testn = PCA_trans(trainn,testn)
     print("Word 2 Vec Done")
     text_len_train = np.zeros((len(trainn), 1))
     text_len_test = np.zeros((len(testn), 1))
