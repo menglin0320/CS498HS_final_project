@@ -43,7 +43,7 @@ class zone_out_lstm_model():
         loss = tf.reduce_sum(loss, axis = 1)
         loss = loss * self.mask[:, i]
         cur_predict = tf.cast(tf.argmax(logits, axis=1), tf.int32)
-        predict = cur_predict * self.mask[:, i] + predict
+        predict = cur_predict * tf.cast(self.mask[:, i], tf.int32) + predict
         # print(predict.get_shape())
         correct_preditions = tf.equal(cur_predict, self.labels[:])
         correct_preditions = tf.cast(correct_preditions, tf.float32) * self.mask[:, i]
