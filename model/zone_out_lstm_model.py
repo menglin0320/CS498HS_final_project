@@ -73,7 +73,7 @@ class zone_out_lstm_model():
         with tf.variable_scope('classifier'):
             in_mean = tf.reduce_sum(self.embedding_batch, axis = 1) / \
                       tf.tile(tf.expand_dims(tf.reduce_sum(self.mask,1), 1), [1, 300])
-            
+
             init_c1 = tf.matmul(in_mean, self.w_2c) + self.bias_2c
             init_c1 = tf.nn.relu(tf.contrib.layers.batch_norm(
                 init_c1, scale=True, is_training=self.is_train,
