@@ -7,7 +7,7 @@ class config:
     word_frequence_json = 'resource/relevant_corpus2.txt'
     data_path = 'data/all_data.json'
 
-    batch_size = 32
+    batch_size = 64
     checkpoint_dir = 'save'
     checkpoint_path = 'save/model.ckpt'
 
