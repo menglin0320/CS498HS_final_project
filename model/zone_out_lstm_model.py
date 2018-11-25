@@ -42,7 +42,7 @@ class zone_out_lstm_model():
 
     def one_iteration(self, state, i, predict):
         out, state = self.ZLSTM(self.embedding_batch[:, i, :], state)
-        logits = tf.matmul(out, self.w_2logit) + self.bias_2logit
+        logits = tf.matmul(out, self.w_2lstminit) + self.bias_2lstminit
         one_hot = tf.one_hot(self.labels[:], 2)
         loss = tf.nn.sigmoid_cross_entropy_with_logits(labels = one_hot, logits = logits)
         loss = tf.reduce_sum(loss, axis = 1)
