@@ -79,6 +79,7 @@ if __name__ == '__main__':
                                                    model.labels: cur_batch['label'],
                                                    model.mask: cur_batch['mask'],
                                                    model.is_train: False})
-    print(predicts)
+        cur_batch['label']
+        print(predicts)
 
 
