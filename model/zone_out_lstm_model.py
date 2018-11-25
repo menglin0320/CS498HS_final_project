@@ -46,7 +46,7 @@ class zone_out_lstm_model():
         # print(predict.get_shape())
         correct_preditions = tf.equal(predict, self.labels[:])
         correct_preditions = tf.cast(correct_preditions, tf.float32) * self.mask[:, i]
-        return state, loss, correct_preditions
+        return predict, state, loss, correct_preditions
 
     def build_model(self):
         with tf.variable_scope('classifier'):
@@ -59,16 +59,17 @@ class zone_out_lstm_model():
             i = tf.constant(1)
 
             while_condition = lambda i, N1, N2, N3: tf.less(i, self.seq_len)
-
-            def body(i, state, total_corrects, total_loss):
-                state, loss, correct_preditions = self.one_iteration(state, i)
+            predicts = []
+            def body(i, state, total_corrects, total_loss, predicts):
+                predict, state, loss, correct_preditions = self.one_iteration(state, i)
                 total_corrects += correct_preditions
                 total_loss += loss
-                return [i + 1, state, total_corrects, total_loss]
+                predicts.append(predict)
+                return [i + 1, state, total_corrects, total_loss, predicts]
 
             # do the loop
-            [i, state, total_corrects, total_loss] = tf.while_loop(while_condition, body, [i, state, total_corrects, loss])
-
+            [i, state, total_corrects, total_loss, predicts] = tf.while_loop(while_condition, body, [i, state, total_corrects, loss, predicts])
+        self.predicts = predicts
         self.total_corrects = total_corrects
         self.loss = total_loss
         self.loss = tf.reduce_mean(self.loss)
