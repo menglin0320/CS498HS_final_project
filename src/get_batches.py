@@ -26,7 +26,7 @@ def get_batches(data_, batch_size):
     # print(batch_size)
     ret = []
     i = 0
-    data_ = resort(data_)
+    # data_ = resort(data_)
     while (batch_size * i < len(data_)):
         cur_batch = {}
         cur_batch_start = i * batch_size
