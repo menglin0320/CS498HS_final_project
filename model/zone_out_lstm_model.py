@@ -19,11 +19,11 @@ class zone_out_lstm_model():
 
     def define_variables(self):
         self.ZLSTM = ZoneoutLSTMCell(self.dim_hidden, self.is_train, zoneout_factor_cell=0.45,
-                 zoneout_factor_output=0.075)
+                 zoneout_factor_output=0.075, scope = 'lstm1')
         self.ZLSTM2 = ZoneoutLSTMCell(self.dim_hidden, self.is_train, zoneout_factor_cell=0.45,
-                                     zoneout_factor_output=0.075)
+                                     zoneout_factor_output=0.075, scope = 'lstm2')
         self.ZLSTM3 = ZoneoutLSTMCell(self.dim_hidden, self.is_train, zoneout_factor_cell=0.45,
-                                      zoneout_factor_output=0.075)
+                                      zoneout_factor_output=0.075, scope = 'lstm3')
         self.batch_size = tf.shape(self.embedding_batch)[0]
         self.w_2logit = tf.get_variable('w_2logit', shape=[self.dim_hidden, self.n_labels],
                                         initializer=self.weight_initializer)
