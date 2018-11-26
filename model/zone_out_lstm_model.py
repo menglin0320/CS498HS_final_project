@@ -100,7 +100,7 @@ class zone_out_lstm_model():
             states = [zero_state, zero_state, zero_state]
             # print(zero_state.get_shape())
             # zero_state = self.ZLSTM.zero_state(self.batch_size, dtype=tf.float32)
-            predict, state, loss, correct_preditions = self.one_iteration(zero_state, 0, 0)
+            predict, states, loss, correct_preditions = self.one_iteration(states, 0, 0)
             total_loss = loss
             total_corrects = correct_preditions
             tf.get_variable_scope().reuse_variables()
