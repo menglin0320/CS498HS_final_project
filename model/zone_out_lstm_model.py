@@ -31,21 +31,29 @@ class zone_out_lstm_model():
         self.bias_2logit = tf.get_variable("bias_2logit", shape=[self.n_labels],
                                            initializer=self.bias_initializer)
 
-        # self.w_2c = tf.get_variable('w_2c', shape=[300, self.dim_hidden],
-        #                                 initializer=self.weight_initializer)
-        # self.bias_2c = tf.get_variable("bias_2c", shape=[self.dim_hidden],
-        #                                    initializer=self.bias_initializer)
+        self.w_2c = tf.get_variable('w_2c', shape=[300, self.dim_hidden],
+                                        initializer=self.weight_initializer)
+        self.bias_2c = tf.get_variable("bias_2c", shape=[self.dim_hidden],
+                                           initializer=self.bias_initializer)
 
         self.w_2c2 = tf.get_variable('w_2c2', shape=[300, self.dim_hidden],
                                     initializer=self.weight_initializer)
         self.bias_2c2 = tf.get_variable("bias_2c2", shape=[self.dim_hidden],
                                        initializer=self.bias_initializer)
 
-        # self.w_2h = tf.get_variable('w_2h', shape=[300, self.dim_hidden],
-        #                             initializer=self.weight_initializer)
-        # self.bias_2h = tf.get_variable("bias_2h", shape=[self.dim_hidden],
-        #                                initializer=self.bias_initializer)
+        self.w_2c1 = tf.get_variable('w_2c1', shape=[300, self.dim_hidden],
+                                     initializer=self.weight_initializer)
+        self.bias_2c1 = tf.get_variable("bias_2c1", shape=[self.dim_hidden],
+                                        initializer=self.bias_initializer)
 
+        self.w_2h = tf.get_variable('w_2h', shape=[300, self.dim_hidden],
+                                    initializer=self.weight_initializer)
+        self.bias_2h = tf.get_variable("bias_2h", shape=[self.dim_hidden],
+                                       initializer=self.bias_initializer)
+        self.w_2h1 = tf.get_variable('w_2h1', shape=[300, self.dim_hidden],
+                                    initializer=self.weight_initializer)
+        self.bias_2h1 = tf.get_variable("bias_2h1", shape=[self.dim_hidden],
+                                       initializer=self.bias_initializer)
         self.w_2h2 = tf.get_variable('w_2h2', shape=[300, self.dim_hidden],
                                     initializer=self.weight_initializer)
         self.bias_2h2 = tf.get_variable("bias_2h2", shape=[self.dim_hidden],
@@ -91,12 +99,19 @@ class zone_out_lstm_model():
             #     lambda: tf.nn.dropout(init_c1, 0.5),
             #     lambda: init_c1
             # )
-            init_c = tf.matmul(in_mean, self.w_2c2) + self.bias_2c2
+            init_c = tf.matmul(in_mean, self.w_2c) + self.bias_2c
 
+            init_h = tf.matmul(in_mean, self.w_2h) + self.bias_2h
 
-            init_h = tf.matmul(in_mean, self.w_2h2) + self.bias_2h2
+            init_c1 = tf.matmul(in_mean, self.w_2c1) + self.bias_2c1
 
-            zero_state = [init_c, init_h]
+            init_h1 = tf.matmul(in_mean, self.w_2h1) + self.bias_2h1
+
+            init_c2 = tf.matmul(in_mean, self.w_2c2) + self.bias_2c2
+
+            init_h2 = tf.matmul(in_mean, self.w_2h2) + self.bias_2h2
+
+            zero_state = [[init_c, init_h], [init_c1, init_h1], [init_c2, init_h2]]
             states = [zero_state, zero_state, zero_state]
             # print(zero_state.get_shape())
             # zero_state = self.ZLSTM.zero_state(self.batch_size, dtype=tf.float32)
