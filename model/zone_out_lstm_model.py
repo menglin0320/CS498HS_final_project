@@ -111,8 +111,7 @@ class zone_out_lstm_model():
 
             init_h2 = tf.matmul(in_mean, self.w_2h2) + self.bias_2h2
 
-            zero_state = [[init_c, init_h], [init_c1, init_h1], [init_c2, init_h2]]
-            states = [zero_state, zero_state, zero_state]
+            states = [[init_c, init_h], [init_c1, init_h1], [init_c2, init_h2]]
             # print(zero_state.get_shape())
             # zero_state = self.ZLSTM.zero_state(self.batch_size, dtype=tf.float32)
             predict, states, loss, correct_preditions = self.one_iteration(states, 0, 0)
