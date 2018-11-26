@@ -19,11 +19,11 @@ class zone_out_lstm_model():
 
     def define_variables(self):
         self.ZLSTM = ZoneoutLSTMCell(self.dim_hidden, self.is_train, zoneout_factor_cell=0.45,
-                 zoneout_factor_output=0.075, scope = 'lstm1')
+                 zoneout_factor_output=0.075)
         self.ZLSTM2 = ZoneoutLSTMCell(self.dim_hidden, self.is_train, zoneout_factor_cell=0.45,
-                                     zoneout_factor_output=0.075, scope = 'lstm2')
+                                     zoneout_factor_output=0.075)
         self.ZLSTM3 = ZoneoutLSTMCell(self.dim_hidden, self.is_train, zoneout_factor_cell=0.45,
-                                      zoneout_factor_output=0.075, scope = 'lstm3')
+                                      zoneout_factor_output=0.075)
         self.batch_size = tf.shape(self.embedding_batch)[0]
         self.w_2logit = tf.get_variable('w_2logit', shape=[self.dim_hidden, self.n_labels],
                                         initializer=self.weight_initializer)
@@ -69,9 +69,9 @@ class zone_out_lstm_model():
     #     return onehot
 
     def one_iteration(self, states, i, predict):
-        out, states[0] = self.ZLSTM(self.embedding_batch[:, i, :], states[0])
-        out, states[1] = self.ZLSTM2(out, states[1])
-        out, states[2] = self.ZLSTM3(out, states[2])
+        out, states[0] = self.ZLSTM(self.embedding_batch[:, i, :], states[0], scope = 'lstm1')
+        out, states[1] = self.ZLSTM2(out, states[1], scope = 'lstm2')
+        out, states[2] = self.ZLSTM3(out, states[2], scope = 'lstm3')
 
         logits = tf.matmul(out, self.w_2logit) + self.bias_2logit
         one_hot = tf.one_hot(self.labels[:], 2)
@@ -123,7 +123,7 @@ class zone_out_lstm_model():
 
             while_condition = lambda i, N1, N2, N3, N4: tf.less(i, self.seq_len)
             def body(i, states, total_corrects, total_loss, predict):
-                predict, state, loss, correct_preditions = self.one_iteration(states, i, predict)
+                predict, states, loss, correct_preditions = self.one_iteration(states, i, predict)
                 total_corrects += correct_preditions
                 total_loss += loss
                 return [i + 1, states, total_corrects, total_loss, predict]
