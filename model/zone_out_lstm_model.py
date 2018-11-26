@@ -114,8 +114,8 @@ class zone_out_lstm_model():
         self.total_corrects = total_corrects
         self.loss = total_loss
         tv = tf.trainable_variables()
-        regularization_cost = tf.reduce_sum([tf.slim.l1_regularizer(v) for v in tv])
-        self.loss = tf.reduce_mean(self.loss) + 0.01*regularization_cost
+        regularization_cost = tf.reduce_sum([tf.nn.l2_loss(v) for v in tv])
+        self.loss = tf.reduce_mean(self.loss) + 0.05*regularization_cost
 
         self.accuracy = tf.reduce_mean(self.total_corrects)
         self.lr = tf.train.exponential_decay(self.initial_lr, self.counter_dis, 30000, 0.96, staircase=True)
