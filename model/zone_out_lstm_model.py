@@ -20,9 +20,10 @@ class zone_out_lstm_model():
     def define_variables(self):
         self.ZLSTM = ZoneoutLSTMCell(self.dim_hidden, self.is_train, zoneout_factor_cell=0.45,
                  zoneout_factor_output=0.075)
-        # self.ZLSTM2 = ZoneoutLSTMCell(self.dim_hidden, self.is_train, zoneout_factor_cell=0.45,
-        #                              zoneout_factor_output=0.075)
-
+        self.ZLSTM2 = ZoneoutLSTMCell(self.dim_hidden, self.is_train, zoneout_factor_cell=0.45,
+                                     zoneout_factor_output=0.075)
+        self.ZLSTM3 = ZoneoutLSTMCell(self.dim_hidden, self.is_train, zoneout_factor_cell=0.45,
+                                      zoneout_factor_output=0.075)
         self.batch_size = tf.shape(self.embedding_batch)[0]
         self.w_2logit = tf.get_variable('w_2logit', shape=[self.dim_hidden, self.n_labels],
                                         initializer=self.weight_initializer)
@@ -59,8 +60,11 @@ class zone_out_lstm_model():
     #     onehot = tf.sparse_to_dense(sparse, tf.stack([self.batch_size, self.n_labels]), 1.0, 0.0)
     #     return onehot
 
-    def one_iteration(self, state, i, predict):
-        out, state = self.ZLSTM(self.embedding_batch[:, i, :], state)
+    def one_iteration(self, states, i, predict):
+        out, states[0] = self.ZLSTM(self.embedding_batch[:, i, :], states[0])
+        out, states[1] = self.ZLSTM2(out, states[1])
+        out, states[2] = self.ZLSTM3(out, states[2])
+
         logits = tf.matmul(out, self.w_2logit) + self.bias_2logit
         one_hot = tf.one_hot(self.labels[:], 2)
         loss = tf.nn.sigmoid_cross_entropy_with_logits(labels = one_hot, logits = logits)
@@ -71,7 +75,7 @@ class zone_out_lstm_model():
         # print(predict.get_shape())
         correct_preditions = tf.equal(cur_predict, self.labels[:])
         correct_preditions = tf.cast(correct_preditions, tf.float32) * self.mask[:, i]
-        return predict, state, loss, correct_preditions
+        return predict, states, loss, correct_preditions
 
     def build_model(self):
         with tf.variable_scope('classifier'):
@@ -93,6 +97,7 @@ class zone_out_lstm_model():
             init_h = tf.matmul(in_mean, self.w_2h2) + self.bias_2h2
 
             zero_state = [init_c, init_h]
+            states = [zero_state, zero_state, zero_state]
             # print(zero_state.get_shape())
             # zero_state = self.ZLSTM.zero_state(self.batch_size, dtype=tf.float32)
             predict, state, loss, correct_preditions = self.one_iteration(zero_state, 0, 0)
@@ -103,13 +108,13 @@ class zone_out_lstm_model():
             i = tf.constant(1)
 
             while_condition = lambda i, N1, N2, N3, N4: tf.less(i, self.seq_len)
-            def body(i, state, total_corrects, total_loss, predict):
-                predict, state, loss, correct_preditions = self.one_iteration(state, i, predict)
+            def body(i, states, total_corrects, total_loss, predict):
+                predict, state, loss, correct_preditions = self.one_iteration(states, i, predict)
                 total_corrects += correct_preditions
                 total_loss += loss
-                return [i + 1, state, total_corrects, total_loss, predict]
+                return [i + 1, states, total_corrects, total_loss, predict]
             # do the loop
-            [i, state, total_corrects, total_loss, predict] = tf.while_loop(while_condition, body, [i, state, total_corrects, loss, predict])
+            [i, states, total_corrects, total_loss, predict] = tf.while_loop(while_condition, body, [i, states, total_corrects, loss, predict])
         self.predicts = predict
         self.total_corrects = total_corrects
         self.loss = total_loss
