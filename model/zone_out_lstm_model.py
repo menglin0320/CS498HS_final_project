@@ -20,6 +20,9 @@ class zone_out_lstm_model():
     def define_variables(self):
         self.ZLSTM = ZoneoutLSTMCell(self.dim_hidden, self.is_train, zoneout_factor_cell=0.45,
                  zoneout_factor_output=0.075)
+        # self.ZLSTM2 = ZoneoutLSTMCell(self.dim_hidden, self.is_train, zoneout_factor_cell=0.45,
+        #                              zoneout_factor_output=0.075)
+
         self.batch_size = tf.shape(self.embedding_batch)[0]
         self.w_2logit = tf.get_variable('w_2logit', shape=[self.dim_hidden, self.n_labels],
                                         initializer=self.weight_initializer)
@@ -79,11 +82,11 @@ class zone_out_lstm_model():
             init_c1 = tf.nn.relu(tf.contrib.layers.batch_norm(
                 init_c1, scale=True, is_training=self.is_train,
                 updates_collections=None))
-            init_c1 = tf.cond(
-                self.is_train,
-                lambda: tf.nn.dropout(init_c1, 0.5),
-                lambda: init_c1
-            )
+            # init_c1 = tf.cond(
+            #     self.is_train,
+            #     lambda: tf.nn.dropout(init_c1, 0.5),
+            #     lambda: init_c1
+            # )
             init_c = tf.matmul(init_c1, self.w_2c2) + self.bias_2c2
 
             init_h1 = tf.matmul(in_mean, self.w_2h) + self.bias_2h
