@@ -50,8 +50,8 @@ if __name__ == '__main__':
 
     # change Posts.xml into List of data records (saved in data_pkl) and also output a word_pkl file.
     # word_pkl contains a Dictionary having word(string object) as key and vector(List of floats) as value. It is also a subset of glove.42B.300d.txt
-    # Data record format: [Body(string), accepted tag(bool), timestamp(float), score(int), commentCount(int)]
-
+    # Data record format: [Body(string), accepted tag(bool), timestamp(float), score(int), commentCount(int), OwnerUserId(string)]
+    #  but after pickle load it will become:[Body(string), accepted tag(string), timestamp(string), score(string), commentCount(string), OwnerUserId(string)]
     obj = untangle.parse('Posts.xml')
     questionDict = {}  # questionDict[id] = false ,if this question has not choose accepted answer
     #                    N     ,if this question choose post with id N as the accepted answer
@@ -71,6 +71,7 @@ if __name__ == '__main__':
     both_with_date = 0
     answer_with_score = 0
     answer_with_commentCount = 0
+    answer_with_OwnerUserId = 0
 
     for i in range(len(obj.posts.row)):
         # progress bar
@@ -120,12 +121,16 @@ if __name__ == '__main__':
                 acc = (questionDict[obj.posts.row[i]['ParentId']][0] == obj.posts.row[i]['Id'])
                 score = -1
                 commentCount = -1
+                ownerUserId = "nan"
                 if obj.posts.row[i]["Score"]:
                     score = int(obj.posts.row[i]["Score"])
                     answer_with_score += 1
                 if obj.posts.row[i]["CommentCount"]:
                     commentCount = int(obj.posts.row[i]["CommentCount"])
                     answer_with_commentCount += 1
+                if obj.posts.row[i]["OwnerUserId"]:
+                    ownerUserId = obj.posts.row[i]["OwnerUserId"]
+                    answer_with_OwnerUserId += 1
                 ansCreationDate = getDate(obj.posts.row[i])
                 quesCreationDate = questionDict[obj.posts.row[i]['ParentId']][1]
                 timestamp = -1
@@ -138,7 +143,7 @@ if __name__ == '__main__':
                 acc_count += acc
                 not_acc_count += 1 - acc
                 # define data record format here
-                answers += [[raw, acc, timestamp, score, commentCount]]
+                answers += [[raw, acc, timestamp, score, commentCount, ownerUserId]]
             # parent question has not choose accepted answer
             else:
                 not_rate_count += 1
@@ -167,7 +172,7 @@ if __name__ == '__main__':
             not_rate_count, weird_ans_count))
     print("match failed words number:{}, kinds:{}".format(non_matched_num, len(non_matched)))
     print("with date: Q:{} A:{} Both:{}".format(question_with_date, answer_with_date, both_with_date))
-    print("Ans with: score:{} commentCount:{}".format(answer_with_score, answer_with_commentCount))
+    print("Ans with: score:{} commentCount:{} ownerUserId:{}".format(answer_with_score, answer_with_commentCount, answer_with_OwnerUserId))
     print(answers[0])
     # output files
     current_dir = os.path.dirname(os.path.abspath(__file__))

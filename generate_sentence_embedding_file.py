@@ -160,6 +160,8 @@ def split_data(config):
     testn = words2vecs(testn, word_dict, freqency_dict)
     testn = PCA_trans(testn)
     print("Word 2 Vec Done")
+
+    #add body len property
     text_len_train = np.zeros((len(trainn), 1))
     text_len_test = np.zeros((len(testn), 1))
     # need to verify
@@ -173,14 +175,42 @@ def split_data(config):
     del text_len_train
     del text_len_test
     del combine
-    print("Sort files down")
-
     # print(trainn[0][6],trainn[1][6])
     # print(trainn[:, 6].astype(np.float32))
     trainn = trainn[trainn[:, -1].astype(np.float32).argsort()]
     # for sample in trainn:
     #     print(sample[6])
     testn = testn[testn[:, -1].astype(np.float32).argsort()]
+    print("Sort files down")
+    # add owner average accepted rate property
+    owner = {}
+    acc_rate_train = np.zeros((len(trainn), 1))
+    acc_rate_test = np.zeros((len(testn), 1))
+    avg = [0, 0]
+    for i in range(0, len(trainn)):
+        if trainn[i][-2] not in owner:
+            owner[trainn[i][-2]] = [bool(trainn[i][1]=="True"), 1]
+        else:
+            owner[trainn[i][-2]][0] += bool(trainn[i][1]=="True")
+            owner[trainn[i][-2]][1] += 1
+        avg[0] += bool(trainn[i][1]=="True")
+        avg[1] += 1
+
+    for i in range(0, len(trainn)):
+        if trainn[i][-2] not in owner or trainn[i][-2] == "nan":
+            acc_rate_train[i] = avg[0]/avg[1]
+        else:
+            acc_rate_train[i] = owner[trainn[i][-2]][0]/owner[trainn[i][-2]][1]
+    for i in range(0, len(testn)):
+        if testn[i][-2] not in owner or testn[i][-2] == "nan":
+            acc_rate_test[i] = avg[0]/avg[1]
+        else:
+            acc_rate_test[i] = owner[testn[i][-2]][0]/owner[testn[i][-2]][1]
+    trainn = np.hstack((trainn, acc_rate_train))
+    testn = np.hstack((testn, acc_rate_test))
+    del acc_rate_train
+    del acc_rate_test
+    
     train_out_path = config.train_data_path
     trainfile = open(train_out_path, 'wb')
     pickle.dump(trainn, trainfile)
@@ -190,6 +220,8 @@ def split_data(config):
     pickle.dump(testn, testfile)
     testfile.close()
 
+    # Data Format: [embedding arrays, acceptance tag, accepted tag(string), timestamp(string), score(string), commentCount(string), OwnerUserId(string), length(float), OwnerAcceptRate(float)] 
+    
     # testfile = open(test_out_path, 'rb')
     # tmp = pickle.load(testfile)
     # print(tmp[0])
