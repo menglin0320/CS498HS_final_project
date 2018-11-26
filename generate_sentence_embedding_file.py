@@ -177,10 +177,10 @@ def split_data(config):
 
     # print(trainn[0][6],trainn[1][6])
     # print(trainn[:, 6].astype(np.float32))
-    trainn = trainn[trainn[:, 2].astype(np.float32).argsort()]
+    trainn = trainn[trainn[:, -1].astype(np.float32).argsort()]
     # for sample in trainn:
     #     print(sample[6])
-    testn = testn[testn[:, 2].astype(np.float32).argsort()]
+    testn = testn[testn[:, -1].astype(np.float32).argsort()]
     train_out_path = config.train_data_path
     trainfile = open(train_out_path, 'wb')
     pickle.dump(trainn, trainfile)
