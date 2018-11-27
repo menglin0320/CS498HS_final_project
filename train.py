@@ -43,13 +43,13 @@ def load_data(train_path, test_path):
         full_data['train'][i]['attributes'] = cell[0]
         # print('real_length{} and leangth used for sorting {}'.format(len(cell[1]),cell[6]))
         full_data['train'][i]['label'] = bool2int(cell[1])
-        full_data['train'][i]['timestamp'] = cell[2]
+        full_data['train'][i]['timestamp'] = float(cell[2])
 
     for i, cell in enumerate(test_data_raw):
         full_data['test'].append({})
         full_data['test'][i]['attributes'] = cell[0]
         full_data['test'][i]['label'] = bool2int(cell[1])
-        full_data['test'][i]['timestamp'] = cell[2]
+        full_data['test'][i]['timestamp'] = float(cell[2])
     return full_data
 
 

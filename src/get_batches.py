@@ -39,10 +39,12 @@ def get_batches(data_, batch_size):
             cur_batch['mask'].append(len(data_[data_ind]['attributes']) - 1)
             cur_batch['data'].append(padding_samples(data_[data_ind]['attributes'], max_n_embed))
             cur_batch['label'].append(data_[data_ind]['label'])
+            cur_batch['timestamp'].append(data_[data_ind]['timestamp'])
             # print(data_ind)
         cur_batch['mask'] = cvt2onehot(np.asarray(cur_batch['mask']))
         cur_batch['label'] = np.asarray(cur_batch['label'])
         cur_batch['data'] = np.asarray(cur_batch['data'])
+        cur_batch['timestamp'] = np.asarray(cur_batch['timestamp'])
         ret.append(cur_batch)
         i += 1
     return ret
