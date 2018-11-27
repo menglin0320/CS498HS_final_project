@@ -8,6 +8,7 @@ class zone_out_lstm_model():
         self.embedding_batch = tf.placeholder(tf.float32, [None, None, word_embedding_size])
         self.labels = tf.placeholder(tf.int32, [None])
         self.mask = tf.placeholder(tf.float32, [None, None])
+        self.time_stamp = tf.placeholder(tf.float32, [None])
         self.is_train = tf.placeholder(tf.bool, [])
         self.seq_len = tf.shape(self.embedding_batch)[1]
         self.initial_lr = tf.constant(2, dtype=tf.float32)
@@ -18,14 +19,14 @@ class zone_out_lstm_model():
         self.build_model()
 
     def define_variables(self):
-        self.ZLSTM = ZoneoutLSTMCell(self.dim_hidden, self.is_train, zoneout_factor_cell=0.45,
-                 zoneout_factor_output=0.075)
-        self.ZLSTM2 = ZoneoutLSTMCell(self.dim_hidden, self.is_train, zoneout_factor_cell=0.45,
-                                     zoneout_factor_output=0.075)
-        self.ZLSTM3 = ZoneoutLSTMCell(self.dim_hidden, self.is_train, zoneout_factor_cell=0.45,
-                                      zoneout_factor_output=0.075)
+        self.ZLSTM = ZoneoutLSTMCell(self.dim_hidden, self.is_train, zoneout_factor_cell=0.5,
+                 zoneout_factor_output=0.05)
+        # self.ZLSTM2 = ZoneoutLSTMCell(self.dim_hidden, self.is_train, zoneout_factor_cell=0.5,
+        #                              zoneout_factor_output=0.05)
+        # self.ZLSTM3 = ZoneoutLSTMCell(self.dim_hidden, self.is_train, zoneout_factor_cell=0.5,
+        #                               zoneout_factor_output=0.05)
         self.batch_size = tf.shape(self.embedding_batch)[0]
-        self.w_2logit = tf.get_variable('w_2logit', shape=[self.dim_hidden, self.n_labels],
+        self.w_2logit = tf.get_variable('w_2logit', shape=[self.dim_hidden + 1, self.n_labels],
                                         initializer=self.weight_initializer)
 
         self.bias_2logit = tf.get_variable("bias_2logit", shape=[self.n_labels],
@@ -36,28 +37,28 @@ class zone_out_lstm_model():
         self.bias_2c = tf.get_variable("bias_2c", shape=[self.dim_hidden],
                                            initializer=self.bias_initializer)
 
-        self.w_2c2 = tf.get_variable('w_2c2', shape=[300, self.dim_hidden],
-                                    initializer=self.weight_initializer)
-        self.bias_2c2 = tf.get_variable("bias_2c2", shape=[self.dim_hidden],
-                                       initializer=self.bias_initializer)
-
-        self.w_2c1 = tf.get_variable('w_2c1', shape=[300, self.dim_hidden],
-                                     initializer=self.weight_initializer)
-        self.bias_2c1 = tf.get_variable("bias_2c1", shape=[self.dim_hidden],
-                                        initializer=self.bias_initializer)
+        # self.w_2c2 = tf.get_variable('w_2c2', shape=[300, self.dim_hidden],
+        #                             initializer=self.weight_initializer)
+        # self.bias_2c2 = tf.get_variable("bias_2c2", shape=[self.dim_hidden],
+        #                                initializer=self.bias_initializer)
+        #
+        # self.w_2c1 = tf.get_variable('w_2c1', shape=[300, self.dim_hidden],
+        #                              initializer=self.weight_initializer)
+        # self.bias_2c1 = tf.get_variable("bias_2c1", shape=[self.dim_hidden],
+        #                                 initializer=self.bias_initializer)
 
         self.w_2h = tf.get_variable('w_2h', shape=[300, self.dim_hidden],
                                     initializer=self.weight_initializer)
         self.bias_2h = tf.get_variable("bias_2h", shape=[self.dim_hidden],
                                        initializer=self.bias_initializer)
-        self.w_2h1 = tf.get_variable('w_2h1', shape=[300, self.dim_hidden],
-                                    initializer=self.weight_initializer)
-        self.bias_2h1 = tf.get_variable("bias_2h1", shape=[self.dim_hidden],
-                                       initializer=self.bias_initializer)
-        self.w_2h2 = tf.get_variable('w_2h2', shape=[300, self.dim_hidden],
-                                    initializer=self.weight_initializer)
-        self.bias_2h2 = tf.get_variable("bias_2h2", shape=[self.dim_hidden],
-                                       initializer=self.bias_initializer)
+        # self.w_2h1 = tf.get_variable('w_2h1', shape=[300, self.dim_hidden],
+        #                             initializer=self.weight_initializer)
+        # self.bias_2h1 = tf.get_variable("bias_2h1", shape=[self.dim_hidden],
+        #                                initializer=self.bias_initializer)
+        # self.w_2h2 = tf.get_variable('w_2h2', shape=[300, self.dim_hidden],
+        #                             initializer=self.weight_initializer)
+        # self.bias_2h2 = tf.get_variable("bias_2h2", shape=[self.dim_hidden],
+        #                                initializer=self.bias_initializer)
 
         self.counter_dis = tf.Variable(trainable=False, initial_value=0, dtype=tf.int32)
     # def convert_label2one_hot(self):
@@ -70,9 +71,10 @@ class zone_out_lstm_model():
 
     def one_iteration(self, states, i, predict):
         out, states[0] = self.ZLSTM(self.embedding_batch[:, i, :], states[0], scope = 'lstm1')
-        out, states[1] = self.ZLSTM2(out, states[1], scope = 'lstm2')
-        out, states[2] = self.ZLSTM3(out, states[2], scope = 'lstm3')
-
+        # out, states[1] = self.ZLSTM2(out, states[1], scope = 'lstm2')
+        # out, states[2] = self.ZLSTM3(out, states[2], scope = 'lstm3')
+        time_stamp = tf.expand_dims(self.time_stamp, 1)
+        out = tf.concat([out, time_stamp], axis = 1)
         logits = tf.matmul(out, self.w_2logit) + self.bias_2logit
         one_hot = tf.one_hot(self.labels[:], 2)
         loss = tf.nn.sigmoid_cross_entropy_with_logits(labels = one_hot, logits = logits)
@@ -103,15 +105,16 @@ class zone_out_lstm_model():
 
             init_h = tf.matmul(in_mean, self.w_2h) + self.bias_2h
 
-            init_c1 = tf.matmul(in_mean, self.w_2c1) + self.bias_2c1
+            # init_c1 = tf.matmul(in_mean, self.w_2c1) + self.bias_2c1
+            #
+            # init_h1 = tf.matmul(in_mean, self.w_2h1) + self.bias_2h1
+            #
+            # init_c2 = tf.matmul(in_mean, self.w_2c2) + self.bias_2c2
+            #
+            # init_h2 = tf.matmul(in_mean, self.w_2h2) + self.bias_2h2
 
-            init_h1 = tf.matmul(in_mean, self.w_2h1) + self.bias_2h1
-
-            init_c2 = tf.matmul(in_mean, self.w_2c2) + self.bias_2c2
-
-            init_h2 = tf.matmul(in_mean, self.w_2h2) + self.bias_2h2
-
-            states = [[init_c, init_h], [init_c1, init_h1], [init_c2, init_h2]]
+            # states = [[init_c, init_h], [init_c1, init_h1], [init_c2, init_h2]]
+            states = [[init_c, init_h]]
             # print(zero_state.get_shape())
             # zero_state = self.ZLSTM.zero_state(self.batch_size, dtype=tf.float32)
             predict, states, loss, correct_preditions = self.one_iteration(states, 0, 0)
@@ -134,7 +137,7 @@ class zone_out_lstm_model():
         self.loss = total_loss
         tv = tf.trainable_variables()
         regularization_cost = tf.reduce_sum([tf.nn.l2_loss(v) for v in tv])
-        self.loss = tf.reduce_mean(self.loss) + 0.01*regularization_cost
+        self.loss = tf.reduce_mean(self.loss) + 0.005*regularization_cost
 
         self.accuracy = tf.reduce_mean(self.total_corrects)
         self.lr = tf.train.exponential_decay(self.initial_lr, self.counter_dis, 30000, 0.96, staircase=True)

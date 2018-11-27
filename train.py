@@ -43,11 +43,13 @@ def load_data(train_path, test_path):
         full_data['train'][i]['attributes'] = cell[0]
         # print('real_length{} and leangth used for sorting {}'.format(len(cell[1]),cell[6]))
         full_data['train'][i]['label'] = bool2int(cell[1])
+        full_data['train'][i]['timestamp'] = cell[2]
+
     for i, cell in enumerate(test_data_raw):
         full_data['test'].append({})
         full_data['test'][i]['attributes'] = cell[0]
         full_data['test'][i]['label'] = bool2int(cell[1])
-
+        full_data['test'][i]['timestamp'] = cell[2]
     return full_data
 
 
@@ -108,6 +110,7 @@ if __name__ == '__main__':
             _, train_loss, train_accy = sess.run([model.opt, model.loss, model.accuracy],
                                                  feed_dict={model.embedding_batch: cur_batch['data'],
                                                             model.labels: cur_batch['label'],
+                                                            model.time_stamp: cur_batch['timestamp'],
                                                             model.mask: cur_batch['mask'],
                                                             model.is_train: True})
             train_avg_loss += train_loss
@@ -125,6 +128,7 @@ if __name__ == '__main__':
             test_loss, test_accy = sess.run([model.loss, model.accuracy],
                                             feed_dict={model.embedding_batch: cur_batch['data'],
                                                        model.labels: cur_batch['label'],
+                                                       model.time_stamp: cur_batch['timestamp'],
                                                        model.mask: cur_batch['mask'],
                                                        model.is_train: False})
             test_avg_loss += test_loss

@@ -122,6 +122,13 @@ def get_freqency_dict(word_dict, frequency_path=""):
     print("weird word:{}".format(len(weird_word)))
     return frequency_dict
 
+def normalize_timestamp(combine):
+    max_ = 0
+    for sample in combine:
+        max_ = max(max_,float(sample[2]))
+    for i in range(len(combine)):
+        combine[i][2] = float(combine[i][2])/max_ * 10e3
+    return combine
 
 def split_data(config):
     data_path = config.raw_data_path
@@ -129,6 +136,7 @@ def split_data(config):
         combine = pickle.load(pkl_f)
 
     combine = np.array(combine)
+    combine = normalize_timestamp(combine)
     np.random.shuffle(combine)
     n_samples = len(combine)
 
@@ -220,7 +228,7 @@ def split_data(config):
     pickle.dump(testn, testfile)
     testfile.close()
 
-    # Data Format: [embedding arrays, acceptance tag, accepted tag(string), timestamp(string), score(string), commentCount(string), OwnerUserId(string), length(float), OwnerAcceptRate(float)] 
+    # Data Format: [embedding arrays, accepted tag(string), timestamp(string), score(string), commentCount(string), OwnerUserId(string), length(float), OwnerAcceptRate(float)]
     
     # testfile = open(test_out_path, 'rb')
     # tmp = pickle.load(testfile)
