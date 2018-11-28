@@ -73,7 +73,7 @@ if __name__ == '__main__':
     checkpoint_path = config.checkpoint_path
     train_path = config.train_data_path
     test_path = config.test_data_path
-    n_epoch = 10
+    n_epoch = 30
 
     model, saver, sess, start_step = initialize_model(checkpoint_dir)
     for d in range(k):
