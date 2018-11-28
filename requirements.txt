@@ -1,0 +1,6 @@
+tensorflow==1.12.0
+nltk==3.4
+numpy==1.15.4
+sklearn==0.0
+beautifulsoup4==4.4.1
+untangle==1.1.1
