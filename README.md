@@ -16,7 +16,7 @@ For cross validation, run
 ```shell
 python3 cross_validation.py 10
 ```
-Notice that this cross validation may take about an hour to run. And the script can be resource demanding, it's better to run it on a lab machine.
+Notice that this cross validation takes days on a laptop. And the script can be resource demanding, it's better to run it on a lab machine.
 
 For the following two steps, you have to run:
 ```shell
@@ -24,6 +24,8 @@ python3  generate_sentence_embedding_file.py
 ```
 to get the splited train validation data in sentence embedding form first.
 (if you already run cross_validation, this step is not required since train valid split are preformed ten times on cross validation)
+
+if you quit from cross validation, clean save folder before running the following python files.
 
 to train the model, run
 ```shell
@@ -51,7 +53,7 @@ then run
 python3  evaluate.py data/pkl_test_data
 ```
 
-# Tips on how do we get the data
+# How do we get the data
 #### Data Cleaning:
 * **Raw Data**: Go to https://archive.org/details/stackexchange to download `christianity.stackexchange.com.7z`, the `Posts.xml` in it is our data. One can find out the format of `Posts.xml` from `readme.txt` from the same website.
 * **Word Embedding Source**: Go to https://github.com/stanfordnlp/GloVe to download `glove.42B.300d.zip`, which contains word-to-vector table.
