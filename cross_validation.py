@@ -1,9 +1,7 @@
 import sys
 from generate_sentence_embedding_file import split_data
 from project_configuration import config
-from train import train
 from os import system
-from evaluate import evaluate
 import numpy as np
 import tensorflow as tf
 import os
@@ -48,12 +46,16 @@ def load_data(train_path, test_path):
         # print('real_length{} and leangth used for sorting {}'.format(len(cell[1]),cell[6]))
         full_data['train'][i]['label'] = bool2int(cell[1])
         full_data['train'][i]['timestamp'] = float(cell[2])
+        full_data['train'][i]['user_prop'] = float(cell[7])
+
 
     for i, cell in enumerate(test_data_raw):
         full_data['test'].append({})
         full_data['test'][i]['attributes'] = cell[0]
         full_data['test'][i]['label'] = bool2int(cell[1])
         full_data['test'][i]['timestamp'] = float(cell[2])
+        full_data['test'][i]['user_prop'] = float(cell[7])
+
     return full_data
 
 if __name__ == '__main__':
@@ -72,13 +74,14 @@ if __name__ == '__main__':
     train_path = config.train_data_path
     test_path = config.test_data_path
     n_epoch = 10
-    data_dict = load_data(train_path, test_path)
-    data_train_batches = get_batches(data_dict['train'], batch_size)
-    data_test_batches = get_batches(data_dict['test'], batch_size)
+
     model, saver, sess, start_step = initialize_model(checkpoint_dir)
-    n_batches = len(data_train_batches)
     for d in range(k):
         split_data(config)
+        data_dict = load_data(train_path, test_path)
+        data_train_batches = get_batches(data_dict['train'], batch_size)
+        data_test_batches = get_batches(data_dict['test'], batch_size)
+        n_batches = len(data_train_batches)
         system('rm save/*')
         sess.run(tf.global_variables_initializer())
         print(d)
@@ -99,6 +102,7 @@ if __name__ == '__main__':
                                                      feed_dict={model.embedding_batch: cur_batch['data'],
                                                                 model.labels: cur_batch['label'],
                                                                 model.time_stamp: cur_batch['timestamp'],
+                                                                model.user_prop: cur_batch['user_prop'],
                                                                 model.mask: cur_batch['mask'],
                                                                 model.is_train: True})
                 train_avg_loss += train_loss
@@ -115,6 +119,7 @@ if __name__ == '__main__':
                                 feed_dict={model.embedding_batch: cur_batch['data'],
                                            model.labels: cur_batch['label'],
                                            model.mask: cur_batch['mask'],
+                                           model.user_prop: cur_batch['user_prop'],
                                            model.time_stamp: cur_batch['timestamp'],
                                            model.is_train: False})
 

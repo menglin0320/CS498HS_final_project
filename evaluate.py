@@ -45,12 +45,14 @@ def load_data(train_path, test_path):
         # print('real_length{} and leangth used for sorting {}'.format(len(cell[1]),cell[6]))
         full_data['train'][i]['label'] = bool2int(cell[1])
         full_data['train'][i]['timestamp'] = float(cell[2])
+        full_data['train'][i]['user_prop'] = float(cell[7])
 
     for i, cell in enumerate(test_data_raw):
         full_data['test'].append({})
         full_data['test'][i]['attributes'] = cell[0]
         full_data['test'][i]['label'] = bool2int(cell[1])
         full_data['test'][i]['timestamp'] = float(cell[2])
+        full_data['test'][i]['user_prop'] = float(cell[7])
 
     return full_data
 
@@ -75,6 +77,7 @@ def evaluate(data_path):
                                         feed_dict={model.embedding_batch: cur_batch['data'],
                                                    model.labels: cur_batch['label'],
                                                    model.mask: cur_batch['mask'],
+                                                   model.user_prop: cur_batch['user_prop'],
                                                    model.time_stamp: cur_batch['timestamp'],
                                                    model.is_train: False})
 
@@ -100,7 +103,7 @@ def evaluate(data_path):
 
     with open('output.txt', 'w') as f:
         for pair in predict_label_pairs:
-            f.write(pair[0] + '\n')
+            f.write(str(int(pair[0])) + '\n')
 
     sess.close()
     return accuracy, precision, recall
@@ -110,6 +113,6 @@ def evaluate(data_path):
 if __name__ == '__main__':
     if len(sys.argv) != 2:
         # print(sys.argv)
-        raise ValueError('please give 1 arg to specify k')
+        raise ValueError('please give 1 arg to specify test_data path')
     pickle_file_path = sys.argv[1]
     evaluate(pickle_file_path)

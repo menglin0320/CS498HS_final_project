@@ -43,12 +43,14 @@ def load_data(train_path, test_path):
         full_data['train'][i]['attributes'] = cell[0]
         # print('real_length{} and leangth used for sorting {}'.format(len(cell[1]),cell[6]))
         full_data['train'][i]['label'] = bool2int(cell[1])
+        full_data['train'][i]['user_prop'] = float(cell[7])
         full_data['train'][i]['timestamp'] = float(cell[2])
 
     for i, cell in enumerate(test_data_raw):
         full_data['test'].append({})
         full_data['test'][i]['attributes'] = cell[0]
         full_data['test'][i]['label'] = bool2int(cell[1])
+        full_data['test'][i]['user_prop'] = float(cell[7])
         full_data['test'][i]['timestamp'] = float(cell[2])
     return full_data
 
@@ -59,7 +61,7 @@ def train():
     checkpoint_path = config.checkpoint_path
     train_path = config.train_data_path
     test_path = config.test_data_path
-    n_epoch = 10
+    n_epoch = 40
     data_dict = load_data(train_path, test_path)
     data_train_batches = get_batches(data_dict['train'], batch_size)
     data_test_batches = get_batches(data_dict['test'], batch_size)
@@ -110,6 +112,7 @@ def train():
                                                  feed_dict={model.embedding_batch: cur_batch['data'],
                                                             model.labels: cur_batch['label'],
                                                             model.time_stamp: cur_batch['timestamp'],
+                                                            model.user_prop: cur_batch['user_prop'],
                                                             model.mask: cur_batch['mask'],
                                                             model.is_train: True})
             train_avg_loss += train_loss
@@ -129,6 +132,7 @@ def train():
                                                        model.labels: cur_batch['label'],
                                                        model.time_stamp: cur_batch['timestamp'],
                                                        model.mask: cur_batch['mask'],
+                                                       model.user_prop: cur_batch['user_prop'],
                                                        model.is_train: False})
             test_avg_loss += test_loss
             test_avg_accy += test_accy

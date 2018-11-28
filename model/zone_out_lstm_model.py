@@ -9,6 +9,7 @@ class zone_out_lstm_model():
         self.labels = tf.placeholder(tf.int32, [None])
         self.mask = tf.placeholder(tf.float32, [None, None])
         self.time_stamp = tf.placeholder(tf.float32, [None])
+        self.user_prop = tf.placeholder(tf.float32, [None])
         self.is_train = tf.placeholder(tf.bool, [])
         self.seq_len = tf.shape(self.embedding_batch)[1]
         self.initial_lr = tf.constant(2, dtype=tf.float32)
@@ -26,7 +27,7 @@ class zone_out_lstm_model():
         # self.ZLSTM3 = ZoneoutLSTMCell(self.dim_hidden, self.is_train, zoneout_factor_cell=0.5,
         #                               zoneout_factor_output=0.05)
         self.batch_size = tf.shape(self.embedding_batch)[0]
-        self.w_2logit1 = tf.get_variable('w_2logit1', shape=[self.dim_hidden + 1, 50],
+        self.w_2logit1 = tf.get_variable('w_2logit1', shape=[self.dim_hidden + 2, 50],
                                         initializer=self.weight_initializer)
 
         self.bias_2logit1 = tf.get_variable("bias_2logit1", shape=[50],
@@ -80,7 +81,8 @@ class zone_out_lstm_model():
         # out, states[1] = self.ZLSTM2(out, states[1], scope = 'lstm2')
         # out, states[2] = self.ZLSTM3(out, states[2], scope = 'lstm3')
         time_stamp = tf.expand_dims(self.time_stamp, 1)
-        out = tf.concat([out, time_stamp], axis = 1)
+        user_prop = tf.expand_dims(self.user_prop, 1)
+        out = tf.concat([out, time_stamp, user_prop], axis = 1)
         mid = tf.nn.relu(tf.matmul(out, self.w_2logit1) + self.bias_2logit1)
         logits = tf.matmul(mid, self.w_2logit2) + self.bias_2logit2
         one_hot = tf.one_hot(self.labels[:], 2)
@@ -144,7 +146,7 @@ class zone_out_lstm_model():
         self.loss = total_loss
         tv = tf.trainable_variables()
         regularization_cost = tf.reduce_sum([tf.nn.l2_loss(v) for v in tv])
-        self.loss = tf.reduce_mean(self.loss) + 0.01*regularization_cost
+        self.loss = tf.reduce_mean(self.loss) + 0.005*regularization_cost
 
         self.accuracy = tf.reduce_mean(self.total_corrects)
         self.lr = tf.train.exponential_decay(self.initial_lr, self.counter_dis, 30000, 0.96, staircase=True)
