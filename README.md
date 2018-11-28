@@ -1,4 +1,52 @@
 # CS498HS_final_project
+# Requirements
+supported python version 3.5
+
+Environment Ubuntu 16.04
+
+To run the repo successfully on Mac or Windows, you have to modify the system calls and shell scripts to meet your environment.
+
+Open command run:
+```shell
+sudo sh ./installation.sh
+```
+
+# Usage
+For cross validation, run
+```shell
+python3 cross_validation.py 10
+```
+Notice that this cross validation may take about an hour to run. And the script can be resource demanding, it's better to run it on a lab machine.
+
+For the following two steps, you have to run:
+```shell
+python3  generate_sentence_embedding_file.py
+```
+to get the splited train validation data in sentence embedding form first.
+(if you already run cross_validation, this step is not required since train valid split are preformed ten times on cross validation)
+
+to train the model, run
+```shell
+python3  train.py
+```
+
+to test the model, run
+```shell
+python3  evaluate.py data/pkl_test_data
+```
+a output.txt file will be generated after excuting evaluate.py.
+
+# Directly run evaluate without training:
+You can run
+```shell
+sh  directly_run.sh
+```
+then run
+```shell
+python3  evaluate.py data/pkl_test_data
+```
+
+# Tips on how do we get the data
 #### Data Cleaning:
 * **Raw Data**: Go to https://archive.org/details/stackexchange to download `christianity.stackexchange.com.7z`, the `Posts.xml` in it is our data. One can find out the format of `Posts.xml` from `readme.txt` from the same website.
 * **Word Embedding Source**: Go to https://github.com/stanfordnlp/GloVe to download `glove.42B.300d.zip`, which contains word-to-vector table.

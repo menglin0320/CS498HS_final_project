@@ -59,7 +59,7 @@ def train():
     checkpoint_path = config.checkpoint_path
     train_path = config.train_data_path
     test_path = config.test_data_path
-    n_epoch = 1000
+    n_epoch = 10
     data_dict = load_data(train_path, test_path)
     data_train_batches = get_batches(data_dict['train'], batch_size)
     data_test_batches = get_batches(data_dict['test'], batch_size)
@@ -139,6 +139,7 @@ def train():
         test_avg_accys.append(test_avg_accy)
         print('for epoch {}: on training_sample avg loss is {}, avg_accy is {}'.format(i, train_avg_loss, train_avg_accy))
         print('for epoch {}: on test_sample avg loss is {}, avg_accy is {}'.format(i, test_avg_loss, test_avg_accy))
+    sess.close()
         # out_npz_dict = {}
         #
         # out_npz_dict['train_sample_losses'] = train_sample_losses

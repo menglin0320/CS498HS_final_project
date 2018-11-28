@@ -6,6 +6,7 @@ import os
 import tensorflow as tf
 import numpy as np
 import pickle
+import sys
 
 def bool2int(b):
     if b == 'True':
@@ -54,35 +55,19 @@ def load_data(train_path, test_path):
     return full_data
 
 
-if __name__ == '__main__':
-    data_path = config.data_path
+
+def evaluate(data_path):
     batch_size = config.batch_size
     checkpoint_dir = config.checkpoint_dir
-    checkpoint_path = config.checkpoint_path
     train_path = config.train_data_path
-    test_path = config.test_data_path
-    n_epoch = 20
+    test_path = data_path
     # TODO write the valid read data function
     data_dict = load_data(train_path, test_path)
     data_train_batches = get_batches(data_dict['train'], batch_size)
-    correct_sum = 0
-    for sample in data_dict['train']:
-        correct_sum += float(sample['label'])
-    print('train_ratio: {}', correct_sum / len(data_dict['train']))
     data_test_batches = get_batches(data_dict['test'], batch_size)
 
     model, saver, sess, start_step = initialize_model(checkpoint_dir)
     n_batches = len(data_train_batches)
-    train_sample_losses = []
-    train_sample_accys = []
-    test_sample_losses = []
-    test_sample_accys = []
-
-    train_avg_losses = []
-    train_avg_accys = []
-    test_avg_losses = []
-    test_avg_accys = []
-
     predict_label_pairs = np.zeros((len(data_dict['test']), 2))
     for j in range(0, len(data_test_batches)):
         cur_batch = data_test_batches[j]
@@ -113,7 +98,18 @@ if __name__ == '__main__':
     recall = np.mean(np.equal(correct_label_samples[:,0], correct_label_samples[:,1]))
     print('recall is : {}'.format(recall))
 
-    correct_label_inds = predict_label_pairs[:,1] == 1
+    with open('output.txt', 'w') as f:
+        for pair in predict_label_pairs:
+            f.write(pair[0] + '\n')
+
+    sess.close()
+    return accuracy, precision, recall
 
 
 
+if __name__ == '__main__':
+    if len(sys.argv) != 2:
+        # print(sys.argv)
+        raise ValueError('please give 1 arg to specify k')
+    pickle_file_path = sys.argv[1]
+    evaluate(pickle_file_path)
