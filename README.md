@@ -37,7 +37,12 @@ python3  evaluate.py data/pkl_test_data
 a output.txt file will be generated after excuting evaluate.py.
 
 # Directly run evaluate without training:
-You can run
+You can open the link 
+```shell
+https://drive.google.com/open?id=1K2i_6PiZ4XztVDWU_svQ3n1JVvoB5qU6
+```
+Download the zip file put it on root of the project and then run
+
 ```shell
 sh  directly_run.sh
 ```
