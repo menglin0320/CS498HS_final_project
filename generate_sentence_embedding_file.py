@@ -4,7 +4,7 @@ import pickle
 from project_configuration import config
 from nltk import tokenize, word_tokenize
 from sklearn.decomposition import TruncatedSVD
-
+from math import log
 
 # U, S, Vt = randomized_svd(X, n_components=1)
 def compute_pc(X, npc=1):
@@ -125,9 +125,10 @@ def get_freqency_dict(word_dict, frequency_path=""):
 def normalize_timestamp(combine):
     max_ = 0
     for sample in combine:
-        max_ = max(max_,float(sample[2]))
+        max_ = max(max_, float(sample[2]))
+    epsilan = 1e-16
     for i in range(len(combine)):
-        combine[i][2] = float(combine[i][2])/max_ * 10e3
+        combine[i][2] = log((float(combine[i][2]) + epsilan)/max_)-0.5
     return combine
 
 def split_data(config):

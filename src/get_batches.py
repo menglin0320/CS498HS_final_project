@@ -35,6 +35,7 @@ def get_batches(data_, batch_size):
         cur_batch['data'] = []
         cur_batch['label'] = []
         cur_batch['mask'] = []
+        cur_batch['timestamp'] = []
         for data_ind in range(cur_batch_start, cur_batch_start + cur_batch_size):
             cur_batch['mask'].append(len(data_[data_ind]['attributes']) - 1)
             cur_batch['data'].append(padding_samples(data_[data_ind]['attributes'], max_n_embed))

@@ -52,8 +52,7 @@ def load_data(train_path, test_path):
         full_data['test'][i]['timestamp'] = float(cell[2])
     return full_data
 
-
-if __name__ == '__main__':
+def train():
     data_path = config.data_path
     batch_size = config.batch_size
     checkpoint_dir = config.checkpoint_dir
@@ -140,15 +139,18 @@ if __name__ == '__main__':
         test_avg_accys.append(test_avg_accy)
         print('for epoch {}: on training_sample avg loss is {}, avg_accy is {}'.format(i, train_avg_loss, train_avg_accy))
         print('for epoch {}: on test_sample avg loss is {}, avg_accy is {}'.format(i, test_avg_loss, test_avg_accy))
-        out_npz_dict = {}
+        # out_npz_dict = {}
+        #
+        # out_npz_dict['train_sample_losses'] = train_sample_losses
+        # out_npz_dict['train_sample_accys'] = train_sample_accys
+        # out_npz_dict['test_sample_losses'] = test_sample_losses
+        # out_npz_dict['test_sample_accys'] = test_sample_accys
+        # out_npz_dict['train_avg_losses'] = train_avg_losses
+        # out_npz_dict['train_avg_accys'] = train_avg_accys
+        # out_npz_dict['test_avg_losses'] = test_avg_losses
+        # out_npz_dict['test_avg_accys'] = test_avg_accys
+        #
+        # dump_pickle('out_npz_dict', out_npz_dict)
 
-        out_npz_dict['train_sample_losses'] = train_sample_losses
-        out_npz_dict['train_sample_accys'] = train_sample_accys
-        out_npz_dict['test_sample_losses'] = test_sample_losses
-        out_npz_dict['test_sample_accys'] = test_sample_accys
-        out_npz_dict['train_avg_losses'] = train_avg_losses
-        out_npz_dict['train_avg_accys'] = train_avg_accys
-        out_npz_dict['test_avg_losses'] = test_avg_losses
-        out_npz_dict['test_avg_accys'] = test_avg_accys
-
-        dump_pickle('out_npz_dict', out_npz_dict)
+if __name__ == '__main__':
+    train()

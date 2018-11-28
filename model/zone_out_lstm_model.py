@@ -26,11 +26,17 @@ class zone_out_lstm_model():
         # self.ZLSTM3 = ZoneoutLSTMCell(self.dim_hidden, self.is_train, zoneout_factor_cell=0.5,
         #                               zoneout_factor_output=0.05)
         self.batch_size = tf.shape(self.embedding_batch)[0]
-        self.w_2logit = tf.get_variable('w_2logit', shape=[self.dim_hidden + 1, self.n_labels],
+        self.w_2logit1 = tf.get_variable('w_2logit1', shape=[self.dim_hidden + 1, 50],
                                         initializer=self.weight_initializer)
 
-        self.bias_2logit = tf.get_variable("bias_2logit", shape=[self.n_labels],
+        self.bias_2logit1 = tf.get_variable("bias_2logit1", shape=[50],
                                            initializer=self.bias_initializer)
+
+        self.w_2logit2 = tf.get_variable('w_2logit2', shape=[50, self.n_labels],
+                                         initializer=self.weight_initializer)
+
+        self.bias_2logit2 = tf.get_variable("bias_2logit2", shape=[self.n_labels],
+                                            initializer=self.bias_initializer)
 
         self.w_2c = tf.get_variable('w_2c', shape=[300, self.dim_hidden],
                                         initializer=self.weight_initializer)
@@ -75,7 +81,8 @@ class zone_out_lstm_model():
         # out, states[2] = self.ZLSTM3(out, states[2], scope = 'lstm3')
         time_stamp = tf.expand_dims(self.time_stamp, 1)
         out = tf.concat([out, time_stamp], axis = 1)
-        logits = tf.matmul(out, self.w_2logit) + self.bias_2logit
+        mid = tf.nn.relu(tf.matmul(out, self.w_2logit1) + self.bias_2logit1)
+        logits = tf.matmul(mid, self.w_2logit2) + self.bias_2logit2
         one_hot = tf.one_hot(self.labels[:], 2)
         loss = tf.nn.sigmoid_cross_entropy_with_logits(labels = one_hot, logits = logits)
         loss = tf.reduce_sum(loss, axis = 1)
@@ -137,7 +144,7 @@ class zone_out_lstm_model():
         self.loss = total_loss
         tv = tf.trainable_variables()
         regularization_cost = tf.reduce_sum([tf.nn.l2_loss(v) for v in tv])
-        self.loss = tf.reduce_mean(self.loss) + 0.005*regularization_cost
+        self.loss = tf.reduce_mean(self.loss) + 0.01*regularization_cost
 
         self.accuracy = tf.reduce_mean(self.total_corrects)
         self.lr = tf.train.exponential_decay(self.initial_lr, self.counter_dis, 30000, 0.96, staircase=True)
